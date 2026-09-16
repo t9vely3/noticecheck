@@ -64,7 +64,7 @@ a{color:var(--accent);text-underline-offset:2px}
 .banner.err{background:var(--bad-soft);border:1px solid color-mix(in srgb,var(--bad) 30%,transparent)}
 .banner.err ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
 .banner .codes{margin-top:6px;font-size:11px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;word-break:break-all}
-.side-foot .btns{display:flex;gap:2px}
+.side-foot .btns{display:flex;gap:2px;flex-wrap:wrap}
 
 .main{min-width:0;padding:24px 32px 60px;max-width:1120px}
 .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
@@ -310,6 +310,14 @@ table.mx{width:100%;border-collapse:collapse}
 .swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;align-items:center;font-size:11px;color:var(--faint)}
 .swatches button{width:18px;height:18px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line2)}
 @media (max-width:860px){ .nav-t{display:none} .split.three{grid-template-columns:1fr} .cat-row{grid-template-columns:30px 1fr auto auto} .cat-row .cnt{display:none} }
+
+.demo-box{display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;background:var(--warn-soft);font-size:11.5px;color:var(--muted);margin-bottom:4px}
+.demo-box b{color:var(--warn);font-size:12px}
+.demo-box .btn{margin-top:4px;justify-content:center}
+.demo-note:empty{display:none}
+.fb-opts{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.fb-opts div{display:flex;flex-direction:column;gap:1px;padding:8px 10px;background:var(--panel2);border-radius:7px;font-size:12px}
+.fb-opts span{color:var(--muted);font-size:11.5px}
 </style>
 </head>
 <body>
@@ -325,11 +333,13 @@ table.mx{width:100%;border-collapse:collapse}
     <div class="nav-t">분류<button id="catSetBtn" title="분류 메뉴 설정">설정</button></div>
     <nav class="nav" id="navCat"></nav>
     <div class="side-foot">
+      <div class="demo-note" id="demoNote"></div>
       <div class="status" id="status"><span class="dot"></span><span>연결 중</span></div>
       <div class="acct" id="acct"></div>
       <div class="btns">
         <button class="btn sm quiet" id="memBtn">팀원 관리</button>
         <button class="btn sm quiet" id="catSetBtn2">메뉴 설정</button>
+        <button class="btn sm quiet" id="fbBtn">연결 설정</button>
         <button class="btn sm quiet" id="themeBtn">다크</button>
       </div>
     </div>
@@ -408,6 +418,8 @@ const LS = {
   get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
+const FBC = FIREBASE_CONFIG.apiKey ? FIREBASE_CONFIG : (LS.get("nb_fbconfig", null) || FIREBASE_CONFIG);
+const FBC_FROM_BROWSER = !FIREBASE_CONFIG.apiKey && !!FBC.apiKey;
 const clip = (s,n=5000) => { s = String(s ?? ""); return s.length > n ? s.slice(0,n) : s; };
 
 /* =========================================================
@@ -433,7 +445,7 @@ const Store = (() => {
   function unsubscribe(){ unsubs.forEach(f => { try{ f(); }catch(e){} }); unsubs = []; notices = []; members = []; logs = []; settings = {}; api.diag.errors = {}; api.diag.loaded = false; }
 
   async function initLive(){
-    firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.initializeApp(FBC);
     db = firebase.firestore();
     // 이메일/비밀번호 로그인: 로그인 상태가 바뀔 때마다 구독을 켜고 끔
     firebase.auth().onAuthStateChanged(user => {
@@ -490,14 +502,14 @@ const Store = (() => {
   }
 
   const api = {
-    live: !!(FIREBASE_CONFIG.apiKey && window.firebase),
+    live: !!(FBC.apiKey && window.firebase),
     diag: {errors:{}, loaded:false},
     user: null, authReady: false,
     async login(email, pw){ await firebase.auth().signInWithEmailAndPassword(email, pw); },
     async logout(){ await firebase.auth().signOut(); },
     async resetPw(email){ await firebase.auth().sendPasswordResetEmail(email); },
     async init(){
-      if(FIREBASE_CONFIG.apiKey && !window.firebase){ api.diag.errors["SDK"] = "firebase-sdk-not-loaded"; }
+      if(FBC.apiKey && !window.firebase){ api.diag.errors["SDK"] = "firebase-sdk-not-loaded"; }
       if(this.live){ try{ await initLive(); }catch(e){ api.diag.errors["초기화"] = e.message; this.live=false; initDemo(); } }
       else initDemo();
     },
@@ -683,7 +695,7 @@ function renderDiag(bad){
   if(/unavailable|failed-precondition/.test(codes) && !tips.length) tips.push("Firestore에 연결하지 못했습니다. 잠시 후 새로고침하거나 네트워크를 확인하세요.");
   box.innerHTML = `<div class="banner err"><b>Firebase 연결에 문제가 있습니다</b>
     <ul>${tips.map(t=>`<li>${t}</li>`).join("")}</ul>
-    <div class="codes">계정: ${esc((Store.user&&Store.user.email)||"-")} · ${Object.entries(D.errors).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(" · ") || "-"} · 프로젝트: ${esc(FIREBASE_CONFIG.projectId||"-")}</div>
+    <div class="codes">계정: ${esc((Store.user&&Store.user.email)||"-")} · ${Object.entries(D.errors).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(" · ") || "-"} · 프로젝트: ${esc(FBC.projectId||"-")}</div>
     <div style="margin-top:6px">설정을 고친 뒤 <b>새로고침</b>하세요.</div></div>`;
 }
 
@@ -746,6 +758,8 @@ function renderSide(){
   st.lastElementChild.textContent = bad ? "연결 오류 · 위 안내 확인"
     : Store.live ? (!Store.authReady ? "연결 중…" : !Store.user ? "로그인 필요" : D.loaded ? "실시간 공유 중" : "불러오는 중…") : "체험 모드 · 이 브라우저에만 저장";
   renderDiag(bad);
+  $("#demoNote").innerHTML = Store.live ? "" :
+    `<div class="demo-box"><b>팀과 공유되지 않는 상태</b><span>Firebase 설정값이 없어 이 브라우저에만 저장됩니다.</span><button class="btn sm primary" id="fbBtn2">Firebase 연결하기</button></div>`;
   $("#acct").innerHTML = Store.live && Store.user
     ? `<span title="${esc(Store.user.email)}">${esc(Store.user.email)}</span><button class="btn sm quiet" id="logoutBtn">로그아웃</button>` : "";
   renderLogin();
@@ -1153,6 +1167,81 @@ async function catSave(){
   }catch(e){ btn.disabled = false; fail(e); }
 }
 
+/* --- Firebase 연결 설정 --- */
+const FB_KEYS = ["apiKey","authDomain","projectId","storageBucket","messagingSenderId","appId","measurementId"];
+function parseFbConfig(txt){
+  const o = {}; let m; const re = /["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g;
+  while((m = re.exec(txt))) if(FB_KEYS.includes(m[1])) o[m[1]] = m[2];
+  return o.apiKey && o.projectId ? o : null;
+}
+function renderFbSettings(){
+  const cur = FBC.apiKey ? FBC : null;
+  openModal(`
+    <div class="mh"><h2>Firebase 연결 설정</h2><button class="x" data-mclose>×</button></div>
+    <div class="mb">
+      <p class="note" style="margin-top:0">Firebase 콘솔 › 프로젝트 설정(톱니바퀴) › 일반 › 내 앱에 있는 <b>const firebaseConfig = { … }</b> 부분을 통째로 복사해 붙여넣으세요.</p>
+      <textarea class="field" id="fbTxt" style="width:100%;min-height:170px;font-family:ui-monospace,Consolas,monospace;font-size:12px" placeholder='const firebaseConfig = {
+  apiKey: "AIza...",
+  authDomain: "....firebaseapp.com",
+  projectId: "...",
+  ...
+};'></textarea>
+      <div class="lg-err" id="fbErr"></div>
+      <div class="note">현재 상태: ${cur ? `<b>${esc(cur.projectId)}</b> 프로젝트에 연결 (${FBC_FROM_BROWSER ? "이 브라우저에 저장된 설정" : "파일에 들어 있는 설정"})` : "연결 안 됨 (체험 모드)"}</div>
+      <div class="fb-opts">
+        <div><b>① 이 브라우저에 저장하고 연결</b><span>지금 이 PC에서 바로 연결됩니다. 다른 팀원 PC에서는 각자 같은 설정을 넣어야 합니다.</span></div>
+        <div><b>② 설정이 들어간 index.html 받기</b><span>받은 파일을 사이트에 올리거나 팀원에게 나눠 주면, 누구든 열자마자 연결됩니다. 팀 공유에는 이 방법을 권합니다.</span></div>
+      </div>
+    </div>
+    <div class="mf">
+      ${FBC_FROM_BROWSER ? `<button class="btn quiet danger" id="fbClear">브라우저 설정 지우기</button><span style="flex:1"></span>` : ""}
+      <button class="btn" id="fbSave">① 저장하고 연결</button>
+      <button class="btn primary" id="fbDown">② index.html 받기</button>
+    </div>`);
+  if(cur) $("#fbTxt").value = "const firebaseConfig = " + JSON.stringify(Object.fromEntries(FB_KEYS.filter(k=>cur[k]).map(k=>[k,cur[k]])), null, 2) + ";";
+}
+function readFbInput(){
+  const c = parseFbConfig($("#fbTxt").value);
+  if(!c){ $("#fbErr").textContent = "apiKey와 projectId를 찾지 못했습니다. firebaseConfig 부분을 그대로 붙여넣었는지 확인하세요."; return null; }
+  return c;
+}
+function fbSave(){
+  const c = readFbInput(); if(!c) return;
+  LS.set("nb_fbconfig", c);
+  toast("저장했습니다. 다시 불러옵니다…");
+  setTimeout(()=>location.reload(), 600);
+}
+function fbClear(){
+  if(!confirm("이 브라우저에 저장된 Firebase 설정을 지우고 체험 모드로 돌아갈까요?")) return;
+  try{ localStorage.removeItem("nb_fbconfig"); }catch(e){}
+  location.reload();
+}
+function fbDownload(){
+  const c = readFbInput(); if(!c) return;
+  const doc = document.documentElement.cloneNode(true);
+  // 화면에 그려진 내용은 비우고 원래 틀만 남김
+  ["#view","#navView","#navCat","#bandWrap","#diag","#banner","#drawer","#modal","#demoNote","#acct","#chips"].forEach(sel => { const el = doc.querySelector(sel); if(el) el.innerHTML = ""; });
+  const tb = doc.querySelector("#toolbar"); if(tb) tb.innerHTML = "";
+  ["#scrim","#drawer","#mw","#toast"].forEach(sel => { const el = doc.querySelector(sel); if(el) el.className = el.className.replace(/\s*\bon\b/g,""); });
+  const lg = doc.querySelector("#login"); if(lg) lg.setAttribute("hidden","");
+  doc.removeAttribute("data-theme");
+  const block = "const FIREBASE_CONFIG = {\n" + FB_KEYS.filter(k=>c[k]).map(k=>`  ${k}: ${JSON.stringify(c[k])}`).join(",\n") + "\n};";
+  let ok = false;
+  doc.querySelectorAll("script").forEach(sc => {
+    if(sc.textContent.includes("const FIREBASE_CONFIG = {")){
+      sc.textContent = sc.textContent.replace(/const FIREBASE_CONFIG = \{[\s\S]*?\};/, block); ok = true;
+    }
+  });
+  if(!ok){ $("#fbErr").textContent = "파일을 만들지 못했습니다. 설정값을 알려 주시면 직접 넣어 드리겠습니다."; return; }
+  const html = "<!DOCTYPE html>\n" + doc.outerHTML;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([html], {type:"text/html"}));
+  a.download = "index.html";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast("index.html을 내려받았습니다");
+}
+
 /* --- 팀원 --- */
 function renderMembers(){
   openModal(`
@@ -1238,6 +1327,10 @@ document.addEventListener("click", async e => {
     case "memBtn": return renderMembers();
     case "catSetBtn": case "catSetBtn2": return openCatSettings();
     case "catAdd": return catAdd();
+    case "fbBtn": case "fbBtn2": return renderFbSettings();
+    case "fbSave": return fbSave();
+    case "fbClear": return fbClear();
+    case "fbDown": return fbDownload();
     case "catSave": return catSave();
     case "memAdd": return addMember();
     case "themeBtn": return setTheme(document.documentElement.dataset.theme==="dark" ? "light" : "dark");

@@ -272,6 +272,21 @@ table.mx{width:100%;border-collapse:collapse}
   .lg{grid-template-columns:1fr;gap:2px;padding:10px 14px}
   .dr-h,.dr-b,.dr-f{padding-left:16px;padding-right:16px}
 }
+
+.acct{display:flex;align-items:center;gap:4px;padding:0 6px;font-size:11px;color:var(--muted);min-width:0}
+.acct span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.acct:empty{display:none}
+.login{position:fixed;inset:0;z-index:80;background:var(--bg);display:grid;place-items:center;padding:16px}
+.login[hidden]{display:none}
+.login-card{width:100%;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 24px;box-shadow:var(--shadow-l);display:flex;flex-direction:column;gap:12px}
+.login-card .mark{font-size:17px;font-weight:700}
+.login-card .sub{margin:-8px 0 4px;color:var(--muted);font-size:12.5px}
+.login-card label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted);font-weight:500}
+.login-card .field{font-size:13px;padding:8px 10px}
+.login-card .btn.primary{justify-content:center;padding:9px}
+.login-card .hint{margin:4px 0 0;font-size:11px;color:var(--faint);text-align:center}
+.lg-err{font-size:12px;color:var(--bad);min-height:0}
+.lg-err:empty{display:none}
 </style>
 </head>
 <body>
@@ -288,6 +303,7 @@ table.mx{width:100%;border-collapse:collapse}
     <nav class="nav" id="navCat"></nav>
     <div class="side-foot">
       <div class="status" id="status"><span class="dot"></span><span>연결 중</span></div>
+      <div class="acct" id="acct"></div>
       <div class="btns">
         <button class="btn sm quiet" id="memBtn">팀원 관리</button>
         <button class="btn sm quiet" id="themeBtn">다크</button>
@@ -312,6 +328,18 @@ table.mx{width:100%;border-collapse:collapse}
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer"></aside>
 <div class="modal-wrap" id="mw"><div class="modal" id="modal"></div></div>
+<div class="login" id="login" hidden>
+  <form class="login-card" id="loginForm" onsubmit="return false">
+    <div class="mark">공지 체크보드</div>
+    <p class="sub">팀 계정으로 로그인하세요</p>
+    <label>이메일<input class="field" id="lgEmail" type="email" autocomplete="username" required></label>
+    <label>비밀번호<input class="field" id="lgPw" type="password" autocomplete="current-password" required></label>
+    <div class="lg-err" id="lgErr"></div>
+    <button class="btn primary" id="loginBtn" type="submit">로그인</button>
+    <button class="btn quiet sm" id="resetBtn" type="button">비밀번호를 잊었어요</button>
+    <p class="hint">계정은 관리자가 Firebase 콘솔 › Authentication › 사용자에서 추가합니다.</p>
+  </form>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -358,21 +386,29 @@ const Store = (() => {
   let db = null;
   const col = n => db.collection(P + "_" + n);
 
-  async function initLive(){
-    firebase.initializeApp(FIREBASE_CONFIG);
-    try {
-      const cred = await firebase.auth().signInAnonymously();
-      api.diag.auth = "ok"; api.diag.uid = cred.user && cred.user.uid;
-    } catch(e){
-      api.diag.auth = e.code || e.message;
-      console.warn("익명 로그인 실패:", e);
-    }
-    db = firebase.firestore();
+  let unsubs = [];
+  function subscribe(){
     const onErr = what => e => { console.error(what, e); api.diag.errors[what] = e.code || e.message; emit(); };
     const ok = what => { delete api.diag.errors[what]; api.diag.loaded = true; };
-    col("notices").onSnapshot(s => { notices = s.docs.map(d => ({id:d.id, ...d.data()})); ok("공지"); emit(); }, onErr("공지"));
-    col("meta").doc("members").onSnapshot(d => { members = (d.exists && d.data().list) || []; ok("팀원"); emit(); }, onErr("팀원"));
-    col("log").orderBy("at","desc").limit(LOG_LIMIT).onSnapshot(s => { logs = s.docs.map(d => ({id:d.id, ...d.data()})); ok("변경 이력"); emit(); }, onErr("변경 이력"));
+    unsubs = [
+      col("notices").onSnapshot(s => { notices = s.docs.map(d => ({id:d.id, ...d.data()})); ok("공지"); emit(); }, onErr("공지")),
+      col("meta").doc("members").onSnapshot(d => { members = (d.exists && d.data().list) || []; ok("팀원"); emit(); }, onErr("팀원")),
+      col("log").orderBy("at","desc").limit(LOG_LIMIT).onSnapshot(s => { logs = s.docs.map(d => ({id:d.id, ...d.data()})); ok("변경 이력"); emit(); }, onErr("변경 이력"))
+    ];
+  }
+  function unsubscribe(){ unsubs.forEach(f => { try{ f(); }catch(e){} }); unsubs = []; notices = []; members = []; logs = []; api.diag.errors = {}; api.diag.loaded = false; }
+
+  async function initLive(){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    // 이메일/비밀번호 로그인: 로그인 상태가 바뀔 때마다 구독을 켜고 끔
+    firebase.auth().onAuthStateChanged(user => {
+      api.user = user ? {uid:user.uid, email:user.email||""} : null;
+      api.authReady = true;
+      unsubscribe();
+      if(user) subscribe();
+      emit();
+    });
   }
 
   function seed(){
@@ -410,7 +446,7 @@ const Store = (() => {
   function saveDemo(){ LS.set("nb2_notices",notices); LS.set("nb2_members",members); LS.set("nb2_logs",logs); }
 
   function logOf(type, n, by, extra){
-    return {at:Date.now(), by:by||"", type, noticeId:n.id||"", title:clip(n.title,200), cat:n.cat||"", ...(extra||{})};
+    return {at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type, noticeId:n.id||"", title:clip(n.title,200), cat:n.cat||"", ...(extra||{})};
   }
   async function writeLog(entry){
     if(api.live) await col("log").add(entry);
@@ -419,7 +455,11 @@ const Store = (() => {
 
   const api = {
     live: !!(FIREBASE_CONFIG.apiKey && window.firebase),
-    diag: {auth:"", uid:"", errors:{}, loaded:false},
+    diag: {errors:{}, loaded:false},
+    user: null, authReady: false,
+    async login(email, pw){ await firebase.auth().signInWithEmailAndPassword(email, pw); },
+    async logout(){ await firebase.auth().signOut(); },
+    async resetPw(email){ await firebase.auth().sendPasswordResetEmail(email); },
     async init(){
       if(FIREBASE_CONFIG.apiKey && !window.firebase){ api.diag.errors["SDK"] = "firebase-sdk-not-loaded"; }
       if(this.live){ try{ await initLive(); }catch(e){ api.diag.errors["초기화"] = e.message; this.live=false; initDemo(); } }
@@ -481,7 +521,7 @@ const Store = (() => {
     async setMembers(list, by, note){
       if(api.live) await col("meta").doc("members").set({list});
       else members = list;
-      if(note) await writeLog({at:Date.now(), by:by||"", type:"member", noticeId:"", title:note, cat:""});
+      if(note) await writeLog({at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type:"member", noticeId:"", title:note, cat:""});
       if(!api.live){ saveDemo(); emit(); }
     }
   };
@@ -575,24 +615,48 @@ function renderDiag(bad){
   const D = Store.diag, codes = Object.values(D.errors).join(" ");
   const tips = [];
   if(D.errors["SDK"]) tips.push("Firebase 스크립트를 불러오지 못했습니다. 인터넷 연결이나 회사 방화벽(gstatic.com 차단)을 확인하세요.");
-  if(D.auth && D.auth !== "ok"){
-    if(/admin-restricted|operation-not-allowed/.test(D.auth)) tips.push("<b>익명 로그인이 꺼져 있습니다.</b> Firebase 콘솔 › Authentication › 로그인 방법 › <b>익명</b>을 사용 설정하세요.");
-    else if(/configuration-not-found/.test(D.auth)) tips.push("<b>Authentication을 아직 시작하지 않았습니다.</b> 콘솔 › Authentication › '시작하기'를 누른 뒤 익명 로그인을 켜세요.");
-    else if(/api-key|invalid/.test(D.auth)) tips.push("<b>FIREBASE_CONFIG 값이 잘못됐습니다.</b> 프로젝트 설정 › 내 앱의 값을 다시 복사해 넣으세요.");
-    else if(/unauthorized-domain|requests-from-referer/.test(D.auth)) tips.push("<b>이 주소가 허용되지 않았습니다.</b> Authentication › 설정 › 승인된 도메인에 현재 도메인을 추가하세요.");
-    else tips.push("익명 로그인 실패: " + esc(D.auth));
-  }
   if(/permission-denied/.test(codes)){
-    tips.push(D.auth === "ok"
-      ? "<b>Firestore 규칙이 막고 있습니다.</b> Firestore Database › 규칙 탭에 안내드린 규칙(noticeboard_notices / meta / log 세 줄)을 붙여넣고 <b>게시</b>를 눌렀는지 확인하세요."
-      : "로그인이 안 된 상태라 규칙에서 거부됐습니다. 위의 익명 로그인 문제를 먼저 해결하세요.");
+    tips.push("<b>Firestore 규칙이 막고 있습니다.</b> Firestore Database › 규칙 탭에 안내드린 규칙(noticeboard_notices / meta / log 세 줄)을 붙여넣고 <b>게시</b>를 눌렀는지 확인하세요.");
   }
   if(/not-found|NOT_FOUND/.test(codes)) tips.push("<b>Firestore 데이터베이스가 없습니다.</b> 콘솔 › Firestore Database › '데이터베이스 만들기'를 진행하세요.");
   if(/unavailable|failed-precondition/.test(codes) && !tips.length) tips.push("Firestore에 연결하지 못했습니다. 잠시 후 새로고침하거나 네트워크를 확인하세요.");
   box.innerHTML = `<div class="banner err"><b>Firebase 연결에 문제가 있습니다</b>
     <ul>${tips.map(t=>`<li>${t}</li>`).join("")}</ul>
-    <div class="codes">로그인: ${esc(D.auth||"-")} · ${Object.entries(D.errors).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(" · ") || "-"} · 프로젝트: ${esc(FIREBASE_CONFIG.projectId||"-")}</div>
+    <div class="codes">계정: ${esc((Store.user&&Store.user.email)||"-")} · ${Object.entries(D.errors).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(" · ") || "-"} · 프로젝트: ${esc(FIREBASE_CONFIG.projectId||"-")}</div>
     <div style="margin-top:6px">설정을 고친 뒤 <b>새로고침</b>하세요.</div></div>`;
+}
+
+const AUTH_MSG = {
+  "auth/invalid-credential":"이메일 또는 비밀번호가 맞지 않습니다.",
+  "auth/wrong-password":"비밀번호가 맞지 않습니다.",
+  "auth/user-not-found":"등록되지 않은 이메일입니다.",
+  "auth/invalid-email":"이메일 형식이 올바르지 않습니다.",
+  "auth/user-disabled":"사용이 중지된 계정입니다.",
+  "auth/too-many-requests":"시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
+  "auth/operation-not-allowed":"Firebase 콘솔 › Authentication › 로그인 방법에서 '이메일/비밀번호'를 사용 설정하세요.",
+  "auth/configuration-not-found":"Firebase 콘솔에서 Authentication '시작하기'를 먼저 누르세요.",
+  "auth/api-key-not-valid.-please-pass-a-valid-api-key.":"FIREBASE_CONFIG의 apiKey가 잘못됐습니다.",
+  "auth/unauthorized-domain":"Authentication › 설정 › 승인된 도메인에 현재 주소를 추가하세요.",
+  "auth/network-request-failed":"네트워크 오류입니다. 연결을 확인하세요."
+};
+const authMsg = e => AUTH_MSG[e.code] || ("로그인 실패: " + (e.code || e.message));
+function renderLogin(){
+  const show = Store.live && Store.authReady && !Store.user;
+  $("#login").hidden = !show;
+}
+async function doLogin(){
+  const em = $("#lgEmail").value.trim(), pw = $("#lgPw").value;
+  if(!$("#loginForm").reportValidity()) return;
+  const btn = $("#loginBtn"); btn.disabled = true; btn.textContent = "로그인 중…"; $("#lgErr").textContent = "";
+  try{ await Store.login(em, pw); $("#lgPw").value = ""; }
+  catch(e){ $("#lgErr").textContent = authMsg(e); }
+  finally{ btn.disabled = false; btn.textContent = "로그인"; }
+}
+async function doReset(){
+  const em = $("#lgEmail").value.trim();
+  if(!em){ $("#lgErr").textContent = "이메일을 먼저 입력하세요."; return; }
+  try{ await Store.resetPw(em); $("#lgErr").textContent = ""; toast("비밀번호 재설정 메일을 보냈습니다"); }
+  catch(e){ $("#lgErr").textContent = authMsg(e); }
 }
 
 function renderSide(){
@@ -616,11 +680,14 @@ function renderSide(){
   }).join("");
 
   const st = $("#status"), D = Store.diag, errs = Object.entries(D.errors);
-  const bad = errs.length || (Store.live && D.auth && D.auth !== "ok");
+  const bad = errs.length > 0;
   st.className = "status" + (bad ? " err" : Store.live && D.loaded ? " live" : "");
   st.lastElementChild.textContent = bad ? "연결 오류 · 위 안내 확인"
-    : Store.live ? (D.loaded ? "실시간 공유 중" : "연결 중…") : "체험 모드 · 이 브라우저에만 저장";
+    : Store.live ? (!Store.authReady ? "연결 중…" : !Store.user ? "로그인 필요" : D.loaded ? "실시간 공유 중" : "불러오는 중…") : "체험 모드 · 이 브라우저에만 저장";
   renderDiag(bad);
+  $("#acct").innerHTML = Store.live && Store.user
+    ? `<span title="${esc(Store.user.email)}">${esc(Store.user.email)}</span><button class="btn sm quiet" id="logoutBtn">로그아웃</button>` : "";
+  renderLogin();
 
   if(!S.me && !$("#banner").textContent)
     $("#banner").innerHTML = `<div class="banner">왼쪽 위 <b>현재 사용자</b>에서 내 이름을 골라야 확인·처리 체크가 기록됩니다. 이름이 없으면 '팀원 관리'에서 추가하세요.</div>`;
@@ -807,7 +874,7 @@ function renderLog(){
         return `<div class="lg">
           <div class="tm2">${hm(l.at)}</div>
           <div>
-            <div class="top">${av(l.by||"?", "r")}<span class="by">${esc(l.by||"이름 없음")}</span>
+            <div class="top">${av(l.by||"?", "r")}<span class="by" title="${esc(l.account||"")}">${esc(l.by||"이름 없음")}</span>
               <span class="act ${l.type}">${ACT[l.type]||l.type}</span>
               ${l.cat?`<span class="cat" data-c="${esc(l.cat)}"><span class="dot"></span>${esc(l.cat)}</span>`:""}
               <span class="ref ${l.type==="member"?"":alive?"":"gone"}" ${alive?`data-open="${l.noticeId}"`:""}>${esc(l.title)}</span>
@@ -1001,6 +1068,9 @@ document.addEventListener("click", async e => {
   }
   switch(el.id){
     case "saveBtn": return submitForm(D.id);
+    case "loginBtn": return doLogin();
+    case "resetBtn": return doReset();
+    case "logoutBtn": if(confirm("로그아웃할까요?")) { closeDrawer(); await Store.logout(); } return;
     case "newBtn": return renderForm();
     case "memBtn": return renderMembers();
     case "memAdd": return addMember();

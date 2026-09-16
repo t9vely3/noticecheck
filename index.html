@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>공지 체크보드</title>
@@ -326,7 +325,7 @@ table.mx{width:100%;border-collapse:collapse}
     <div class="brand"><div class="mark">공지 체크보드</div><div class="sub">팀 공지 확인 · 누락 관리</div></div>
     <div class="mebox">
       <label>현재 사용자</label>
-      <div class="row"><span class="av r" id="meAv">?</span><select id="meSel"></select></div>
+      <div class="row"><span class="av r" id="meAv">태욱</span><select id="meSel"><option value="">이름 선택</option><option selected="">김태욱</option><option>김민영</option><option>최봉경</option><option>조용준</option><option>최병훈</option></select></div>
     </div>
     <div class="nav-t">보기</div>
     <nav class="nav" id="navView"></nav>
@@ -334,7 +333,7 @@ table.mx{width:100%;border-collapse:collapse}
     <nav class="nav" id="navCat"></nav>
     <div class="side-foot">
       <div class="demo-note" id="demoNote"></div>
-      <div class="status" id="status"><span class="dot"></span><span>연결 중</span></div>
+      <div class="status" id="status"><span class="dot"></span><span>체험 모드 · 이 브라우저에만 저장</span></div>
       <div class="acct" id="acct"></div>
       <div class="btns">
         <button class="btn sm quiet" id="memBtn">팀원 관리</button>
@@ -349,7 +348,7 @@ table.mx{width:100%;border-collapse:collapse}
     <div id="diag"></div>
     <div id="banner"></div>
     <div class="head">
-      <div><h1 id="pageTitle">공지 목록</h1><div class="date" id="todayLbl"></div></div>
+      <div><h1 id="pageTitle">공지 목록</h1><div class="date" id="todayLbl">2026년 9월 16일 수요일</div></div>
       <div class="sp"></div>
       <button class="btn primary" id="newBtn">+ 새 공지</button>
     </div>
@@ -362,12 +361,12 @@ table.mx{width:100%;border-collapse:collapse}
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer"></aside>
 <div class="modal-wrap" id="mw"><div class="modal" id="modal"></div></div>
-<div class="login" id="login" hidden>
+<div class="login" id="login" hidden="">
   <form class="login-card" id="loginForm" onsubmit="return false">
     <div class="mark">공지 체크보드</div>
     <p class="sub">팀 계정으로 로그인하세요</p>
-    <label>이메일<input class="field" id="lgEmail" type="email" autocomplete="username" required></label>
-    <label>비밀번호<input class="field" id="lgPw" type="password" autocomplete="current-password" required></label>
+    <label>이메일<input class="field" id="lgEmail" type="email" autocomplete="username" required=""></label>
+    <label>비밀번호<input class="field" id="lgPw" type="password" autocomplete="current-password" required=""></label>
     <div class="lg-err" id="lgErr"></div>
     <button class="btn primary" id="loginBtn" type="submit">로그인</button>
     <button class="btn quiet sm" id="resetBtn" type="button">비밀번호를 잊었어요</button>
@@ -382,12 +381,12 @@ table.mx{width:100%;border-collapse:collapse}
       apiKey가 비어 있으면 '체험 모드'(이 브라우저에만 저장)로 동작합니다.
    ========================================================= */
 const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCQix_uMdvMdGKvo3ZSe7KgIoD7HJEXp0g",
+  authDomain: "noticecheck-80980.firebaseapp.com",
+  projectId: "noticecheck-80980",
+  storageBucket: "noticecheck-80980.firebasestorage.app",
+  messagingSenderId: "251674052066",
+  appId: "1:251674052066:web:9edd72d52728a1486425bb"
 };
 const P = "noticeboard";   // 컬렉션: noticeboard_notices / noticeboard_meta / noticeboard_log
 const LOG_LIMIT = 2000;    // 불러올 최근 이력 수
@@ -1363,5 +1362,6 @@ Store.on(render);
 render();
 Store.init().then(render);
 </script>
-</body>
-</html>
+
+
+</body><whale-quicksearch translate="no" style="visibility: visible;"></whale-quicksearch></html>

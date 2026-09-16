@@ -60,6 +60,10 @@ a{color:var(--accent);text-underline-offset:2px}
 .status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;padding:0 6px}
 .status .dot{background:var(--faint);width:6px;height:6px}
 .status.live .dot{background:var(--ok)}
+.status.err{color:var(--bad)} .status.err .dot{background:var(--bad)}
+.banner.err{background:var(--bad-soft);border:1px solid color-mix(in srgb,var(--bad) 30%,transparent)}
+.banner.err ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.banner .codes{margin-top:6px;font-size:11px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;word-break:break-all}
 .side-foot .btns{display:flex;gap:2px}
 
 .main{min-width:0;padding:24px 32px 60px;max-width:1120px}
@@ -292,6 +296,7 @@ table.mx{width:100%;border-collapse:collapse}
   </aside>
 
   <main class="main">
+    <div id="diag"></div>
     <div id="banner"></div>
     <div class="head">
       <div><h1 id="pageTitle">공지 목록</h1><div class="date" id="todayLbl"></div></div>
@@ -315,12 +320,12 @@ table.mx{width:100%;border-collapse:collapse}
       apiKey가 비어 있으면 '체험 모드'(이 브라우저에만 저장)로 동작합니다.
    ========================================================= */
 const FIREBASE_CONFIG = {
- apiKey: "AIzaSyCQix_uMdvMdGKvo3ZSe7KgIoD7HJEXp0g",
-  authDomain: "noticecheck-80980.firebaseapp.com",
-  projectId: "noticecheck-80980",
-  storageBucket: "noticecheck-80980.firebasestorage.app",
-  messagingSenderId: "251674052066",
-  appId: "1:251674052066:web:9edd72d52728a1486425bb"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 const P = "noticeboard";   // 컬렉션: noticeboard_notices / noticeboard_meta / noticeboard_log
 const LOG_LIMIT = 2000;    // 불러올 최근 이력 수
@@ -355,14 +360,19 @@ const Store = (() => {
 
   async function initLive(){
     firebase.initializeApp(FIREBASE_CONFIG);
-    try { await firebase.auth().signInAnonymously(); } catch(e){ console.warn("익명 로그인 실패:", e.code); }
+    try {
+      const cred = await firebase.auth().signInAnonymously();
+      api.diag.auth = "ok"; api.diag.uid = cred.user && cred.user.uid;
+    } catch(e){
+      api.diag.auth = e.code || e.message;
+      console.warn("익명 로그인 실패:", e);
+    }
     db = firebase.firestore();
-    col("notices").onSnapshot(s => { notices = s.docs.map(d => ({id:d.id, ...d.data()})); emit(); },
-      e => showBanner("공지 불러오기 실패: " + e.code + " — Firestore 규칙을 확인하세요."));
-    col("meta").doc("members").onSnapshot(d => { members = (d.exists && d.data().list) || []; emit(); },
-      e => showBanner("팀원 불러오기 실패: " + e.code));
-    col("log").orderBy("at","desc").limit(LOG_LIMIT).onSnapshot(s => { logs = s.docs.map(d => ({id:d.id, ...d.data()})); emit(); },
-      e => showBanner("변경 이력 불러오기 실패: " + e.code));
+    const onErr = what => e => { console.error(what, e); api.diag.errors[what] = e.code || e.message; emit(); };
+    const ok = what => { delete api.diag.errors[what]; api.diag.loaded = true; };
+    col("notices").onSnapshot(s => { notices = s.docs.map(d => ({id:d.id, ...d.data()})); ok("공지"); emit(); }, onErr("공지"));
+    col("meta").doc("members").onSnapshot(d => { members = (d.exists && d.data().list) || []; ok("팀원"); emit(); }, onErr("팀원"));
+    col("log").orderBy("at","desc").limit(LOG_LIMIT).onSnapshot(s => { logs = s.docs.map(d => ({id:d.id, ...d.data()})); ok("변경 이력"); emit(); }, onErr("변경 이력"));
   }
 
   function seed(){
@@ -409,8 +419,10 @@ const Store = (() => {
 
   const api = {
     live: !!(FIREBASE_CONFIG.apiKey && window.firebase),
+    diag: {auth:"", uid:"", errors:{}, loaded:false},
     async init(){
-      if(this.live){ try{ await initLive(); }catch(e){ showBanner("Firebase 연결 실패: "+e.message+" — 체험 모드로 전환합니다."); this.live=false; initDemo(); } }
+      if(FIREBASE_CONFIG.apiKey && !window.firebase){ api.diag.errors["SDK"] = "firebase-sdk-not-loaded"; }
+      if(this.live){ try{ await initLive(); }catch(e){ api.diag.errors["초기화"] = e.message; this.live=false; initDemo(); } }
       else initDemo();
     },
     on(f){ listeners.push(f); },
@@ -557,10 +569,36 @@ function render(){
   if(S.openId) renderDrawer(S.openId, true);
 }
 
+function renderDiag(bad){
+  const box = $("#diag");
+  if(!bad){ box.innerHTML = ""; return; }
+  const D = Store.diag, codes = Object.values(D.errors).join(" ");
+  const tips = [];
+  if(D.errors["SDK"]) tips.push("Firebase 스크립트를 불러오지 못했습니다. 인터넷 연결이나 회사 방화벽(gstatic.com 차단)을 확인하세요.");
+  if(D.auth && D.auth !== "ok"){
+    if(/admin-restricted|operation-not-allowed/.test(D.auth)) tips.push("<b>익명 로그인이 꺼져 있습니다.</b> Firebase 콘솔 › Authentication › 로그인 방법 › <b>익명</b>을 사용 설정하세요.");
+    else if(/configuration-not-found/.test(D.auth)) tips.push("<b>Authentication을 아직 시작하지 않았습니다.</b> 콘솔 › Authentication › '시작하기'를 누른 뒤 익명 로그인을 켜세요.");
+    else if(/api-key|invalid/.test(D.auth)) tips.push("<b>FIREBASE_CONFIG 값이 잘못됐습니다.</b> 프로젝트 설정 › 내 앱의 값을 다시 복사해 넣으세요.");
+    else if(/unauthorized-domain|requests-from-referer/.test(D.auth)) tips.push("<b>이 주소가 허용되지 않았습니다.</b> Authentication › 설정 › 승인된 도메인에 현재 도메인을 추가하세요.");
+    else tips.push("익명 로그인 실패: " + esc(D.auth));
+  }
+  if(/permission-denied/.test(codes)){
+    tips.push(D.auth === "ok"
+      ? "<b>Firestore 규칙이 막고 있습니다.</b> Firestore Database › 규칙 탭에 안내드린 규칙(noticeboard_notices / meta / log 세 줄)을 붙여넣고 <b>게시</b>를 눌렀는지 확인하세요."
+      : "로그인이 안 된 상태라 규칙에서 거부됐습니다. 위의 익명 로그인 문제를 먼저 해결하세요.");
+  }
+  if(/not-found|NOT_FOUND/.test(codes)) tips.push("<b>Firestore 데이터베이스가 없습니다.</b> 콘솔 › Firestore Database › '데이터베이스 만들기'를 진행하세요.");
+  if(/unavailable|failed-precondition/.test(codes) && !tips.length) tips.push("Firestore에 연결하지 못했습니다. 잠시 후 새로고침하거나 네트워크를 확인하세요.");
+  box.innerHTML = `<div class="banner err"><b>Firebase 연결에 문제가 있습니다</b>
+    <ul>${tips.map(t=>`<li>${t}</li>`).join("")}</ul>
+    <div class="codes">로그인: ${esc(D.auth||"-")} · ${Object.entries(D.errors).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(" · ") || "-"} · 프로젝트: ${esc(FIREBASE_CONFIG.projectId||"-")}</div>
+    <div style="margin-top:6px">설정을 고친 뒤 <b>새로고침</b>하세요.</div></div>`;
+}
+
 function renderSide(){
   const sel = $("#meSel");
   if(S.me && M().length && !M().includes(S.me)){ S.me=""; LS.set("nb_me",""); }
-  sel.innerHTML = `<option value="">이름을 선택하세요</option>` + M().map(m=>`<option ${m===S.me?"selected":""}>${esc(m)}</option>`).join("");
+  sel.innerHTML = `<option value="">이름 선택</option>` + M().map(m=>`<option ${m===S.me?"selected":""}>${esc(m)}</option>`).join("");
   $("#meAv").textContent = S.me ? initials(S.me) : "?";
 
   const unread = S.me ? Store.notices.filter(myUnread).length : 0;
@@ -577,9 +615,12 @@ function renderSide(){
       <span class="ic">${c==="전체"?"·":`<span class="dot" style="background:var(--cc)"></span>`}</span>${c}<span class="ct">${n}</span></button>`;
   }).join("");
 
-  const st = $("#status");
-  st.className = "status" + (Store.live ? " live" : "");
-  st.lastElementChild.textContent = Store.live ? "실시간 공유 중" : "체험 모드 · 이 브라우저에만 저장";
+  const st = $("#status"), D = Store.diag, errs = Object.entries(D.errors);
+  const bad = errs.length || (Store.live && D.auth && D.auth !== "ok");
+  st.className = "status" + (bad ? " err" : Store.live && D.loaded ? " live" : "");
+  st.lastElementChild.textContent = bad ? "연결 오류 · 위 안내 확인"
+    : Store.live ? (D.loaded ? "실시간 공유 중" : "연결 중…") : "체험 모드 · 이 브라우저에만 저장";
+  renderDiag(bad);
 
   if(!S.me && !$("#banner").textContent)
     $("#banner").innerHTML = `<div class="banner">왼쪽 위 <b>현재 사용자</b>에서 내 이름을 골라야 확인·처리 체크가 기록됩니다. 이름이 없으면 '팀원 관리'에서 추가하세요.</div>`;
@@ -880,7 +921,12 @@ async function submitForm(id){
     closeModal();
   }catch(e){ btn.disabled = false; fail(e); }
 }
-function fail(e){ console.error(e); toast("저장 실패: " + (e.code||e.message)); }
+function fail(e){
+  console.error(e);
+  const c = e.code || e.message;
+  toast(/permission-denied/.test(c) ? "저장 실패: 권한 없음 (위쪽 안내를 확인하세요)" : "저장 실패: " + c);
+  if(/permission-denied/.test(c)){ Store.diag.errors["저장"] = c; render(); }
+}
 
 /* --- 팀원 --- */
 function renderMembers(){
@@ -984,7 +1030,8 @@ function setTheme(t){
 setTheme(LS.get("nb_theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 
 Store.on(render);
-Store.init();
+render();
+Store.init().then(render);
 </script>
 </body>
 </html>

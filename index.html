@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko"><head>
+<html lang="ko">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>공지 체크보드</title>
@@ -317,6 +318,25 @@ table.mx{width:100%;border-collapse:collapse}
 .fb-opts{display:flex;flex-direction:column;gap:6px;margin-top:12px}
 .fb-opts div{display:flex;flex-direction:column;gap:1px;padding:8px 10px;background:var(--panel2);border-radius:7px;font-size:12px}
 .fb-opts span{color:var(--muted);font-size:11.5px}
+
+.lg-form{display:flex;flex-direction:column;gap:12px}
+.lg-links{display:flex;justify-content:space-between}
+.lg-state{display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:8px;font-size:12px;color:var(--muted)}
+.lg-state b{font-size:13px}
+.lg-state.wait{background:var(--warn-soft)} .lg-state.wait b{color:var(--warn)}
+.lg-state.no{background:var(--bad-soft)} .lg-state.no b{color:var(--bad)}
+.login-card .hint{margin:0}
+.urow{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.urow:last-child{border-bottom:0}
+.uinfo{display:flex;flex-direction:column;min-width:0}
+.uinfo b{font-size:13px}
+.uinfo .flag{align-self:flex-start;margin-top:2px}
+.ust{font-size:11px;font-weight:600;padding:1px 7px;border-radius:4px;background:var(--panel2);color:var(--muted)}
+.ust.pending{background:var(--warn-soft);color:var(--warn)} .ust.approved{background:var(--ok-soft);color:var(--ok)}
+.ust.rejected,.ust.disabled{background:var(--bad-soft);color:var(--bad)}
+.uacts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.mebox select:disabled{opacity:1;color:var(--text);appearance:none;-webkit-appearance:none}
+@media (max-width:860px){ .urow{grid-template-columns:auto 1fr auto} .uacts{grid-column:1/-1;justify-content:flex-start} }
 </style>
 </head>
 <body>
@@ -324,8 +344,8 @@ table.mx{width:100%;border-collapse:collapse}
   <aside class="side">
     <div class="brand"><div class="mark">공지 체크보드</div><div class="sub">팀 공지 확인 · 누락 관리</div></div>
     <div class="mebox">
-      <label>현재 사용자</label>
-      <div class="row"><span class="av r" id="meAv">태욱</span><select id="meSel"><option value="">이름 선택</option><option selected="">김태욱</option><option>김민영</option><option>최봉경</option><option>조용준</option><option>최병훈</option></select></div>
+      <label id="meLbl">현재 사용자</label>
+      <div class="row"><span class="av r" id="meAv">?</span><select id="meSel"></select></div>
     </div>
     <div class="nav-t">보기</div>
     <nav class="nav" id="navView"></nav>
@@ -333,7 +353,7 @@ table.mx{width:100%;border-collapse:collapse}
     <nav class="nav" id="navCat"></nav>
     <div class="side-foot">
       <div class="demo-note" id="demoNote"></div>
-      <div class="status" id="status"><span class="dot"></span><span>체험 모드 · 이 브라우저에만 저장</span></div>
+      <div class="status" id="status"><span class="dot"></span><span>연결 중</span></div>
       <div class="acct" id="acct"></div>
       <div class="btns">
         <button class="btn sm quiet" id="memBtn">팀원 관리</button>
@@ -348,7 +368,7 @@ table.mx{width:100%;border-collapse:collapse}
     <div id="diag"></div>
     <div id="banner"></div>
     <div class="head">
-      <div><h1 id="pageTitle">공지 목록</h1><div class="date" id="todayLbl">2026년 9월 16일 수요일</div></div>
+      <div><h1 id="pageTitle">공지 목록</h1><div class="date" id="todayLbl"></div></div>
       <div class="sp"></div>
       <button class="btn primary" id="newBtn">+ 새 공지</button>
     </div>
@@ -361,18 +381,7 @@ table.mx{width:100%;border-collapse:collapse}
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer"></aside>
 <div class="modal-wrap" id="mw"><div class="modal" id="modal"></div></div>
-<div class="login" id="login" hidden="">
-  <form class="login-card" id="loginForm" onsubmit="return false">
-    <div class="mark">공지 체크보드</div>
-    <p class="sub">팀 계정으로 로그인하세요</p>
-    <label>이메일<input class="field" id="lgEmail" type="email" autocomplete="username" required=""></label>
-    <label>비밀번호<input class="field" id="lgPw" type="password" autocomplete="current-password" required=""></label>
-    <div class="lg-err" id="lgErr"></div>
-    <button class="btn primary" id="loginBtn" type="submit">로그인</button>
-    <button class="btn quiet sm" id="resetBtn" type="button">비밀번호를 잊었어요</button>
-    <p class="hint">계정은 관리자가 Firebase 콘솔 › Authentication › 사용자에서 추가합니다.</p>
-  </form>
-</div>
+<div class="login" id="login" hidden><div class="login-card" id="loginCard"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -381,12 +390,12 @@ table.mx{width:100%;border-collapse:collapse}
       apiKey가 비어 있으면 '체험 모드'(이 브라우저에만 저장)로 동작합니다.
    ========================================================= */
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCQix_uMdvMdGKvo3ZSe7KgIoD7HJEXp0g",
-  authDomain: "noticecheck-80980.firebaseapp.com",
-  projectId: "noticecheck-80980",
-  storageBucket: "noticecheck-80980.firebasestorage.app",
-  messagingSenderId: "251674052066",
-  appId: "1:251674052066:web:9edd72d52728a1486425bb"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 const P = "noticeboard";   // 컬렉션: noticeboard_notices / noticeboard_meta / noticeboard_log
 const LOG_LIMIT = 2000;    // 불러올 최근 이력 수
@@ -447,13 +456,52 @@ const Store = (() => {
     firebase.initializeApp(FBC);
     db = firebase.firestore();
     // 이메일/비밀번호 로그인: 로그인 상태가 바뀔 때마다 구독을 켜고 끔
+    let profUnsub = null, usersUnsub = null;
     firebase.auth().onAuthStateChanged(user => {
       api.user = user ? {uid:user.uid, email:user.email||""} : null;
       api.authReady = true;
+      api.profile = null; api.profileState = user ? "loading" : "";
       unsubscribe();
-      if(user) subscribe();
+      if(profUnsub){ profUnsub(); profUnsub = null; }
+      if(usersUnsub){ usersUnsub(); usersUnsub = null; api.users = []; }
+      if(user){
+        // 내 가입 정보(noticeboard_users/{uid})를 실시간으로 지켜보다가 승인되면 데이터 구독 시작
+        profUnsub = col("users").doc(user.uid).onSnapshot(async d => {
+          if(!d.exists){
+            api.profile = null;
+            if(api.signingUp) return;                // 가입 신청 중에는 신청서가 곧 써짐
+            api.profileState = "creating"; emit();
+            await ensureProfile(user);
+            return;
+          }
+          const pf = d.data();
+          api.profile = pf;
+          api.profileState = pf.status || "pending";
+          if(pf.status === "approved"){
+            if(!unsubs.length) subscribe();
+            if(pf.role === "admin" && !usersUnsub){
+              usersUnsub = col("users").onSnapshot(s => { api.users = s.docs.map(x => ({uid:x.id, ...x.data()})); emit(); },
+                e => { api.diag.errors["가입자 목록"] = e.code || e.message; emit(); });
+            }
+            if(pf.role !== "admin" && usersUnsub){ usersUnsub(); usersUnsub = null; api.users = []; }
+          } else {
+            unsubscribe();
+            if(usersUnsub){ usersUnsub(); usersUnsub = null; api.users = []; }
+          }
+          emit();
+        }, e => { api.profileState = "error"; api.diag.errors["내 계정"] = e.code || e.message; emit(); });
+      }
       emit();
     });
+  }
+  // 콘솔에서 직접 만든 계정처럼 가입 정보가 없는 경우: 관리자 이메일이면 관리자로, 아니면 승인 대기로 등록
+  async function ensureProfile(user){
+    const ref = col("users").doc(user.uid), base = {email:user.email||"", createdAt:Date.now()};
+    try{ await ref.set({...base, name:"", status:"approved", role:"admin"}); }
+    catch(e){
+      try{ await ref.set({...base, name:(user.email||"").split("@")[0], status:"pending", role:"member"}); }
+      catch(e2){ api.profileState = "error"; api.diag.errors["내 계정"] = e2.code || e2.message; emit(); }
+    }
   }
 
   function seed(){
@@ -503,7 +551,33 @@ const Store = (() => {
   const api = {
     live: !!(FBC.apiKey && window.firebase),
     diag: {errors:{}, loaded:false},
-    user: null, authReady: false,
+    user: null, authReady: false, profile: null, profileState: "", users: [], signingUp: false,
+    async signup(name, email, pw){
+      api.signingUp = true;
+      try{
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email, pw);
+        await col("users").doc(cred.user.uid).set({name, email, status:"pending", role:"member", createdAt:Date.now()});
+      } finally { api.signingUp = false; }
+    },
+    async setMyName(name){
+      await col("users").doc(api.user.uid).update({name});
+      if(!members.includes(name)) await api.setMembers([...members, name], name, `팀원 추가: ${name}`);
+    },
+    async updateUser(u, patch, by, note){
+      await col("users").doc(u.uid).update(patch);
+      const name = patch.name || u.name;
+      let list = [...members];
+      const nowApproved = (patch.status || u.status) === "approved";
+      if(patch.name && u.name && patch.name !== u.name) list = list.map(m => m===u.name ? patch.name : m);
+      if(nowApproved && name && !list.includes(name)) list.push(name);
+      if(!nowApproved && name) list = list.filter(m => m !== name);
+      const changed = list.join("\n") !== members.join("\n");
+      if(changed || note) await api.setMembers(list, by, note);
+    },
+    async deleteUserDoc(u, by){
+      await col("users").doc(u.uid).delete();
+      await writeLog({at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type:"member", noticeId:"", title:`가입 기록 삭제: ${u.name||u.email}`, cat:""});
+    },
     async login(email, pw){ await firebase.auth().signInWithEmailAndPassword(email, pw); },
     async logout(){ await firebase.auth().signOut(); },
     async resetPw(email){ await firebase.auth().sendPasswordResetEmail(email); },
@@ -588,6 +662,7 @@ const Store = (() => {
     async setMembers(list, by, note){
       if(api.live) await col("meta").doc("members").set({list});
       else members = list;
+      if(api.live) members = list;
       if(note) await writeLog({at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type:"member", noticeId:"", title:note, cat:""});
       if(!api.live){ saveDemo(); emit(); }
     }
@@ -598,7 +673,9 @@ const Store = (() => {
 /* =========================================================
    3) 상태·판정
    ========================================================= */
-const S = { view:"list", cat:"전체", q:"", state:"all", month:"", logType:"content", openId:null, me: LS.get("nb_me","") };
+const S = { get me(){ return (Store.live && Store.profile && Store.profile.status==="approved") ? (Store.profile.name||"") : this._me; }, set me(v){ this._me = v; }, _me:"", view:"list", cat:"전체", q:"", state:"all", month:"", logType:"content", openId:null, };
+S.me = LS.get("nb_me","");
+const isAdmin = () => Store.live && Store.profile && Store.profile.status==="approved" && Store.profile.role==="admin";
 const M = () => Store.members;
 const isRead = (n,m) => !!(n.read && n.read[m]);
 const isDone = (n,m) => !!(n.done && n.done[m]);
@@ -670,13 +747,14 @@ function av(name, cls=""){ return `<span class="av ${cls}${name===S.me?" me":""}
 
 function render(){
   renderSide();
-  const titles = {list:"공지 목록", matrix:"누락 현황", log:"변경 이력"};
+  const titles = {list:"공지 목록", matrix:"누락 현황", log:"변경 이력", users:"가입 승인"};
   $("#pageTitle").textContent = titles[S.view];
   const d = new Date();
   $("#todayLbl").textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`;
   renderBand(); renderToolbar();
   if(S.view==="list") renderList();
   else if(S.view==="matrix") renderMatrix();
+  else if(S.view==="users") renderUsers();
   else renderLog();
   if(S.openId) renderDrawer(S.openId, true);
 }
@@ -688,7 +766,7 @@ function renderDiag(bad){
   const tips = [];
   if(D.errors["SDK"]) tips.push("Firebase 스크립트를 불러오지 못했습니다. 인터넷 연결이나 회사 방화벽(gstatic.com 차단)을 확인하세요.");
   if(/permission-denied/.test(codes)){
-    tips.push("<b>Firestore 규칙이 막고 있습니다.</b> Firestore Database › 규칙 탭에 안내드린 규칙(noticeboard_notices / meta / log 세 줄)을 붙여넣고 <b>게시</b>를 눌렀는지 확인하세요.");
+    tips.push("<b>Firestore 규칙이 막고 있습니다.</b> Firestore Database › 규칙 탭에 안내드린 승인제 규칙 전체를 붙여넣고 <b>게시</b>를 눌렀는지 확인하세요.");
   }
   if(/not-found|NOT_FOUND/.test(codes)) tips.push("<b>Firestore 데이터베이스가 없습니다.</b> 콘솔 › Firestore Database › '데이터베이스 만들기'를 진행하세요.");
   if(/unavailable|failed-precondition/.test(codes) && !tips.length) tips.push("Firestore에 연결하지 못했습니다. 잠시 후 새로고침하거나 네트워크를 확인하세요.");
@@ -712,17 +790,79 @@ const AUTH_MSG = {
   "auth/network-request-failed":"네트워크 오류입니다. 연결을 확인하세요."
 };
 const authMsg = e => AUTH_MSG[e.code] || ("로그인 실패: " + (e.code || e.message));
+let LG = {mode:"login", shown:""};
+function loginMode(){
+  if(!Store.live || !Store.authReady) return "";
+  if(!Store.user) return LG.mode === "signup" ? "signup" : "login";
+  const st = Store.profileState;
+  if(st === "approved") return (Store.profile && !Store.profile.name) ? "name" : "";
+  return st || "loading";
+}
 function renderLogin(){
-  const show = Store.live && Store.authReady && !Store.user;
-  $("#login").hidden = !show;
+  const mode = loginMode();
+  $("#login").hidden = !mode;
+  if(mode === LG.shown) return;           // 입력 중인 내용이 지워지지 않도록 모드가 바뀔 때만 다시 그림
+  LG.shown = mode;
+  const head = sub => `<div class="mark">공지 체크보드</div><p class="sub">${sub}</p>`;
+  const out = `<button class="btn quiet sm" id="logoutBtn2" type="button">다른 계정으로 로그인</button>`;
+  const email = Store.user ? `<p class="hint">${esc(Store.user.email)}</p>` : "";
+  const H = {
+    login: `<form id="loginForm" onsubmit="return false" class="lg-form">${head("팀 계정으로 로그인하세요")}
+      <label>이메일<input class="field" id="lgEmail" type="email" autocomplete="username" required></label>
+      <label>비밀번호<input class="field" id="lgPw" type="password" autocomplete="current-password" required></label>
+      <div class="lg-err" id="lgErr"></div>
+      <button class="btn primary" id="loginBtn" type="submit">로그인</button>
+      <div class="lg-links"><button class="btn quiet sm" id="resetBtn" type="button">비밀번호 찾기</button><button class="btn quiet sm" id="toSignup" type="button">가입 신청 →</button></div></form>`,
+    signup: `<form id="signupForm" onsubmit="return false" class="lg-form">${head("가입 신청 후 관리자가 승인하면 이용할 수 있습니다")}
+      <label>이름 (체크 현황에 표시됩니다)<input class="field" id="suName" required maxlength="20" placeholder="홍길동"></label>
+      <label>이메일<input class="field" id="suEmail" type="email" autocomplete="username" required></label>
+      <label>비밀번호 (6자 이상)<input class="field" id="suPw" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label>비밀번호 확인<input class="field" id="suPw2" type="password" autocomplete="new-password" minlength="6" required></label>
+      <div class="lg-err" id="lgErr"></div>
+      <button class="btn primary" id="signupBtn" type="submit">가입 신청</button>
+      <div class="lg-links"><button class="btn quiet sm" id="toLogin" type="button">← 로그인으로</button></div></form>`,
+    pending: `<div class="lg-form">${head("가입 신청이 접수되었습니다")}
+      <div class="lg-state wait"><b>관리자 승인 대기 중</b><span>승인되면 이 화면이 자동으로 바뀝니다. 창을 닫았다가 나중에 다시 로그인해도 됩니다.</span></div>
+      ${email}${out}</div>`,
+    rejected: `<div class="lg-form">${head("가입 신청이 승인되지 않았습니다")}
+      <div class="lg-state no"><b>승인 거절</b><span>관리자에게 문의하세요.</span></div>${email}${out}</div>`,
+    disabled: `<div class="lg-form">${head("사용이 중지된 계정입니다")}
+      <div class="lg-state no"><b>이용 중지</b><span>관리자에게 문의하세요.</span></div>${email}${out}</div>`,
+    loading: `<div class="lg-form">${head("계정 정보를 확인하고 있습니다…")}${email}${out}</div>`,
+    creating: `<div class="lg-form">${head("계정 정보를 등록하고 있습니다…")}${email}</div>`,
+    error: `<div class="lg-form">${head("계정 정보를 불러오지 못했습니다")}
+      <div class="lg-state no"><b>권한 오류</b><span>Firestore 규칙에 noticeboard_users 부분이 들어 있는지 확인하세요. (${esc(Object.values(Store.diag.errors).join(", "))})</span></div>${email}${out}</div>`,
+    name: `<form id="nameForm" onsubmit="return false" class="lg-form">${head("관리자 계정으로 로그인했습니다")}
+      <label>체크 현황에 표시할 내 이름<input class="field" id="myName" required maxlength="20" placeholder="예: 김태욱"></label>
+      <div class="lg-err" id="lgErr"></div>
+      <button class="btn primary" id="nameBtn" type="submit">시작하기</button></form>`
+  };
+  $("#loginCard").innerHTML = H[mode] || "";
+  const f = $("#loginCard input"); if(f) setTimeout(()=>f.focus(), 30);
 }
 async function doLogin(){
-  const em = $("#lgEmail").value.trim(), pw = $("#lgPw").value;
   if(!$("#loginForm").reportValidity()) return;
+  const em = $("#lgEmail").value.trim(), pw = $("#lgPw").value;
   const btn = $("#loginBtn"); btn.disabled = true; btn.textContent = "로그인 중…"; $("#lgErr").textContent = "";
-  try{ await Store.login(em, pw); $("#lgPw").value = ""; }
-  catch(e){ $("#lgErr").textContent = authMsg(e); }
-  finally{ btn.disabled = false; btn.textContent = "로그인"; }
+  try{ await Store.login(em, pw); }
+  catch(e){ $("#lgErr").textContent = authMsg(e); btn.disabled = false; btn.textContent = "로그인"; }
+}
+async function doSignup(){
+  if(!$("#signupForm").reportValidity()) return;
+  const nm = $("#suName").value.trim(), em = $("#suEmail").value.trim(), pw = $("#suPw").value;
+  if(pw !== $("#suPw2").value){ $("#lgErr").textContent = "비밀번호 확인이 일치하지 않습니다."; return; }
+  const btn = $("#signupBtn"); btn.disabled = true; btn.textContent = "신청 중…"; $("#lgErr").textContent = "";
+  try{ await Store.signup(nm, em, pw); LG.mode = "login"; }
+  catch(e){
+    const m = {"auth/email-already-in-use":"이미 가입된 이메일입니다. 로그인해 보세요.","auth/weak-password":"비밀번호는 6자 이상이어야 합니다.","permission-denied":"신청서를 저장하지 못했습니다. Firestore 규칙(noticeboard_users)을 확인하세요."};
+    $("#lgErr").textContent = m[e.code] || authMsg(e);
+    btn.disabled = false; btn.textContent = "가입 신청";
+  }
+}
+async function doSetName(){
+  if(!$("#nameForm").reportValidity()) return;
+  try{ await Store.setMyName($("#myName").value.trim()); }
+  catch(e){ $("#lgErr").textContent = "저장 실패: " + (e.code||e.message); }
 }
 async function doReset(){
   const em = $("#lgEmail").value.trim();
@@ -731,16 +871,83 @@ async function doReset(){
   catch(e){ $("#lgErr").textContent = authMsg(e); }
 }
 
+/* --- 가입 승인(관리자) --- */
+const ST_LABEL = {pending:"승인 대기", approved:"승인됨", rejected:"거절", disabled:"이용 중지"};
+function renderUsers(){
+  if(!isAdmin()){ $("#view").innerHTML = `<div class="empty"><div class="serif">관리자만 볼 수 있습니다</div></div>`; return; }
+  const U = [...Store.users].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const q = S.q.trim().toLowerCase();
+  const list = U.filter(u => !q || ((u.name||"")+" "+(u.email||"")).toLowerCase().includes(q));
+  const group = (title, arr, note) => `<section class="day">
+    <div class="day-h"><h3>${title}</h3><span class="cnt">${arr.length}명</span></div>
+    <div class="card">${arr.length ? arr.map(u => {
+      const mine = Store.user && u.uid === Store.user.uid;
+      const acts = u.status==="pending"
+        ? `<button class="btn sm ok" data-uact="approve" data-uid="${u.uid}">승인</button><button class="btn sm quiet danger" data-uact="reject" data-uid="${u.uid}">거절</button>`
+        : u.status==="approved"
+        ? (mine ? `<span class="meta">나</span>` :
+           `${u.role==="admin" ? `<button class="btn sm quiet" data-uact="unadmin" data-uid="${u.uid}">관리자 해제</button>` : `<button class="btn sm quiet" data-uact="admin" data-uid="${u.uid}">관리자 지정</button>`}
+            <button class="btn sm quiet danger" data-uact="disable" data-uid="${u.uid}">이용 중지</button>`)
+        : `<button class="btn sm" data-uact="approve" data-uid="${u.uid}">다시 승인</button><button class="btn sm quiet danger" data-uact="remove" data-uid="${u.uid}">기록 삭제</button>`;
+      return `<div class="urow">
+        ${av(u.name||"?", u.status==="approved" ? "a" : "")}
+        <div class="uinfo"><b>${esc(u.name||"(이름 없음)")}</b>${u.role==="admin"?`<span class="flag mine">관리자</span>`:""}
+          <span class="meta">${esc(u.email||"")}${u.createdAt?` · 신청 ${mdhm(u.createdAt)}`:""}</span></div>
+        <span class="ust ${u.status}">${ST_LABEL[u.status]||u.status}</span>
+        <div class="uacts"><button class="btn sm quiet" data-uact="rename" data-uid="${u.uid}">이름 수정</button>${acts}</div>
+      </div>`;
+    }).join("") : `<div class="empty" style="padding:22px 0">${note}</div>`}</div></section>`;
+  $("#view").innerHTML =
+    group("승인 대기", list.filter(u=>u.status==="pending"), "대기 중인 신청이 없습니다") +
+    group("승인된 팀원", list.filter(u=>u.status==="approved"), "승인된 팀원이 없습니다") +
+    (list.some(u=>u.status==="rejected"||u.status==="disabled") ? group("거절 · 이용 중지", list.filter(u=>u.status==="rejected"||u.status==="disabled"), "") : "") +
+    `<p class="note">승인하면 팀원 목록에 이름이 자동으로 추가되고, 이용 중지하면 목록에서 빠집니다. 로그인 계정 자체를 완전히 지우려면 Firebase 콘솔 › Authentication › 사용자에서 삭제하세요.</p>`;
+}
+async function userAction(act, uidv){
+  const u = Store.users.find(x=>x.uid===uidv); if(!u) return;
+  const who = u.name || u.email;
+  try{
+    if(act==="approve"){
+      if(!u.name){ const nm = prompt("체크 현황에 표시할 이름을 입력하세요", (u.email||"").split("@")[0]); if(!nm) return; u.name = nm.trim(); await Store.updateUser(u, {status:"approved", name:u.name}, S.me, `가입 승인: ${u.name}`); }
+      else {
+        if(Store.users.some(x=>x.uid!==u.uid && x.status==="approved" && x.name===u.name)){
+          const nm = prompt(`'${u.name}' 이름이 이미 있습니다. 구분할 이름을 입력하세요`, u.name + "2"); if(!nm) return;
+          await Store.updateUser(u, {status:"approved", name:nm.trim()}, S.me, `가입 승인: ${nm.trim()}`);
+        } else await Store.updateUser(u, {status:"approved"}, S.me, `가입 승인: ${who}`);
+      }
+      toast(`${who} 님을 승인했습니다`);
+    }
+    if(act==="reject"){ if(!confirm(`${who} 님의 가입 신청을 거절할까요?`)) return; await Store.updateUser(u, {status:"rejected"}, S.me, `가입 거절: ${who}`); toast("거절했습니다"); }
+    if(act==="disable"){ if(!confirm(`${who} 님의 이용을 중지할까요? 팀원 목록에서도 빠집니다.`)) return; await Store.updateUser(u, {status:"disabled", role:"member"}, S.me, `이용 중지: ${who}`); toast("이용을 중지했습니다"); }
+    if(act==="admin"){ await Store.updateUser(u, {role:"admin"}, S.me, `관리자 지정: ${who}`); toast("관리자로 지정했습니다"); }
+    if(act==="unadmin"){ await Store.updateUser(u, {role:"member"}, S.me, `관리자 해제: ${who}`); toast("관리자에서 해제했습니다"); }
+    if(act==="rename"){
+      const nm = (prompt("새 이름", u.name||"")||"").trim(); if(!nm || nm===u.name) return;
+      if(Store.users.some(x=>x.uid!==u.uid && x.name===nm)) return toast("이미 있는 이름입니다");
+      await Store.updateUser(u, {name:nm}, S.me, `이름 변경: ${u.name||"(없음)"} → ${nm}`); toast("이름을 바꿨습니다");
+    }
+    if(act==="remove"){ if(!confirm(`${who} 님의 가입 기록을 삭제할까요? 같은 계정으로 로그인하면 다시 승인 대기로 등록됩니다.`)) return; await Store.deleteUserDoc(u, S.me); toast("삭제했습니다"); }
+  }catch(e){ fail(e); }
+}
+
 function renderSide(){
-  const sel = $("#meSel");
-  if(S.me && M().length && !M().includes(S.me)){ S.me=""; LS.set("nb_me",""); }
-  sel.innerHTML = `<option value="">이름 선택</option>` + M().map(m=>`<option ${m===S.me?"selected":""}>${esc(m)}</option>`).join("");
+  const sel = $("#meSel"), bound = Store.live && Store.profile && Store.profile.status==="approved";
+  if(!bound && S.me && M().length && !M().includes(S.me)){ S.me=""; LS.set("nb_me",""); }
+  sel.innerHTML = bound
+    ? `<option selected>${esc(S.me)}</option>`
+    : `<option value="">이름 선택</option>` + M().map(m=>`<option ${m===S.me?"selected":""}>${esc(m)}</option>`).join("");
+  sel.disabled = !!bound;
+  $("#meLbl").textContent = bound ? (isAdmin() ? "로그인 · 관리자" : "로그인") : "현재 사용자";
   $("#meAv").textContent = S.me ? initials(S.me) : "?";
 
   const unread = S.me ? Store.notices.filter(myUnack).length : 0;
   const miss = Store.notices.reduce((s,n)=>s+M().filter(m=>!isAck(n,m)).length,0);
   const todayLogs = Store.logs.filter(l=>ymd(l.at)===today() && ["create","edit","delete"].includes(l.type)).length;
   const views = [["list","☰","공지 목록",unread,unread>0],["matrix","◫","누락 현황",miss,false],["log","↻","변경 이력",todayLogs?`오늘 ${todayLogs}`:"",false]];
+  if(isAdmin()){
+    const pend = Store.users.filter(u=>u.status==="pending").length;
+    views.push(["users","✓","가입 승인",pend,pend>0]);
+  } else if(S.view==="users") S.view = "list";
   $("#navView").innerHTML = views.map(([k,ic,l,c,hot]) =>
     `<button class="${S.view===k?"on":""}" data-view="${k}"><span class="ic">${ic}</span>${l}<span class="ct ${hot?"hot":""}">${c||""}</span></button>`).join("");
 
@@ -769,6 +976,7 @@ function renderSide(){
 }
 
 function renderBand(){
+  if(S.view==="users"){ $("#bandWrap").innerHTML = ""; return; }
   if(S.view==="log"){
     const L = Store.logs, t = today();
     const c = ty => L.filter(l=>ymd(l.at)===t && l.type===ty).length;
@@ -801,6 +1009,8 @@ function renderToolbar(){
   if(q.value !== S.q) q.value = S.q;
   if($("#fMonth").value !== S.month) $("#fMonth").value = S.month;
   let chips;
+  $("#fMonth").style.display = S.view==="users" ? "none" : "";
+  if(S.view==="users"){ $("#chips").innerHTML = ""; q.placeholder = "이름·이메일 검색"; return; }
   if(S.view==="log"){
     chips = Object.entries(LOG_TYPES).map(([k,v])=>`<button class="chip ${S.logType===k?"on":""}" data-logtype="${k}">${v.label}</button>`).join("");
   } else {
@@ -1243,6 +1453,14 @@ function fbDownload(){
 
 /* --- 팀원 --- */
 function renderMembers(){
+  if(Store.live){
+    openModal(`<div class="mh"><h2>팀원 관리</h2><button class="x" data-mclose>×</button></div>
+      <div class="mb"><p style="margin:0 0 10px">연결된 상태에서는 <b>가입 신청 → 관리자 승인</b>으로 팀원이 정해집니다.</p>
+      <div class="mem">${M().map(m=>`<div>${av(m,"n")}<span>${esc(m)}</span></div>`).join("") || `<p class="meta">아직 승인된 팀원이 없습니다.</p>`}</div>
+      <p class="note">${isAdmin() ? "승인·이용 중지·이름 수정은 왼쪽 '가입 승인' 메뉴에서 합니다." : "팀원 추가·변경은 관리자에게 요청하세요."}</p></div>
+      <div class="mf">${isAdmin() ? `<button class="btn primary" data-view="users" data-mclose>가입 승인으로 이동</button>` : `<button class="btn" data-mclose>닫기</button>`}</div>`);
+    return;
+  }
   openModal(`
     <div class="mh"><h2>팀원 관리</h2><button class="x" data-mclose>×</button></div>
     <div class="mb">
@@ -1269,13 +1487,13 @@ async function addMember(){
    5) 이벤트
    ========================================================= */
 document.addEventListener("click", async e => {
-  const el = e.target.closest("[data-close],[data-mclose],[data-open],[data-view],[data-cat],[data-state],[data-logtype],[data-mark],[data-cmt],[data-edit],[data-del],[data-mup],[data-mdel],[data-cup],[data-cdn],[data-cdel],[data-sw],button");
+  const el = e.target.closest("[data-close],[data-mclose],[data-open],[data-view],[data-cat],[data-state],[data-logtype],[data-mark],[data-cmt],[data-edit],[data-del],[data-mup],[data-mdel],[data-cup],[data-cdn],[data-cdel],[data-sw],[data-uact],button");
   if(e.target.id==="scrim") return closeDrawer();
   if(e.target.id==="mw") return closeModal();
   if(!el) return;
   const D = el.dataset;
   if("close" in D) return closeDrawer();
-  if("mclose" in D) return closeModal();
+  if("mclose" in D){ closeModal(); if(D.view){ S.view = D.view; render(); } return; }
   if(D.open) return renderDrawer(D.open);
   if(D.view){ S.view = D.view; S.q=""; window.scrollTo(0,0); return render(); }
   if(D.cat){ S.cat = D.cat; return render(); }
@@ -1309,6 +1527,7 @@ document.addEventListener("click", async e => {
     if(!confirm(name + " 님을 팀원 목록에서 뺄까요?")) return;
     await Store.setMembers(M().filter(m=>m!==name), S.me, `팀원 삭제: ${name}`); renderMembers(); return;
   }
+  if(D.uact) return userAction(D.uact, D.uid);
   if(D.cup){ syncCE(); const i=+D.cup; if(i>0){ [CE[i-1],CE[i]]=[CE[i],CE[i-1]]; renderCatSettings(); } return; }
   if(D.cdn){ syncCE(); const i=+D.cdn; if(i<CE.length-1){ [CE[i+1],CE[i]]=[CE[i],CE[i+1]]; renderCatSettings(); } return; }
   if(D.cdel){ syncCE(); const i=+D.cdel, r=CE[i]; if(!r.orig) CE.splice(i,1); else r.del=!r.del; renderCatSettings(); return; }
@@ -1320,6 +1539,11 @@ document.addEventListener("click", async e => {
   switch(el.id){
     case "saveBtn": return submitForm(D.id);
     case "loginBtn": return doLogin();
+    case "signupBtn": return doSignup();
+    case "nameBtn": return doSetName();
+    case "toSignup": LG.mode = "signup"; return renderLogin();
+    case "toLogin": LG.mode = "login"; return renderLogin();
+    case "logoutBtn2": LG.mode = "login"; return Store.logout();
     case "resetBtn": return doReset();
     case "logoutBtn": if(confirm("로그아웃할까요?")) { closeDrawer(); await Store.logout(); } return;
     case "newBtn": return renderForm();
@@ -1362,6 +1586,5 @@ Store.on(render);
 render();
 Store.init().then(render);
 </script>
-
-
-</body><whale-quicksearch translate="no" style="visibility: visible;"></whale-quicksearch></html>
+</body>
+</html>

@@ -119,12 +119,13 @@ a{color:var(--accent);text-underline-offset:2px}
 .row.over::before{background:var(--bad)}
 .cat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--cc)}
 .cat .dot{background:var(--cc);width:6px;height:6px}
-[data-c="공지사항"]{--cc:var(--c1)} [data-c="학사공지"]{--cc:var(--c2)} [data-c="교육공지"]{--cc:var(--c3)} [data-c="자료정보"]{--cc:var(--c4)} [data-c="기타"]{--cc:var(--c5)}
+
 .tt{font-size:13.5px;font-weight:600;margin:2px 0 3px;line-height:1.45}
 .flag{display:inline-block;font-size:10px;font-weight:600;padding:0 5px;line-height:17px;border-radius:4px;margin-right:5px;vertical-align:1px}
 .flag.imp{background:var(--bad-soft);color:var(--bad)}
 .flag.act{background:var(--warn-soft);color:var(--warn)}
 .flag.mine{background:var(--accent-soft);color:var(--accent)}
+.flag.need{background:var(--warn-soft);color:var(--warn)}
 .flag.done{background:var(--ok-soft);color:var(--ok)}
 .meta{display:flex;flex-wrap:wrap;gap:2px 10px;color:var(--faint);font-size:11.5px}
 .meta .edited{color:var(--warn)}
@@ -134,13 +135,15 @@ a{color:var(--accent);text-underline-offset:2px}
 .chk{display:flex;flex-direction:column;gap:4px;justify-content:center;border-left:1px solid var(--line);padding-left:16px}
 .avs{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:1px}
 .av{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-size:9px;font-weight:600;letter-spacing:-.04em;background:var(--panel2);color:var(--faint);border:1px solid var(--line2);flex:none}
-.av.r{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.av.n{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.av.r{background:var(--panel);color:var(--accent);border:1px solid var(--accent)}
+.av.a{background:var(--accent);color:#fff;border-color:transparent}
 .av.d{background:var(--ok);color:#fff;border-color:transparent}
 .av.me{box-shadow:0 0 0 1px var(--panel),0 0 0 2px var(--accent)}
 .who-line{font-size:11.5px;display:flex;gap:6px;align-items:baseline;line-height:1.4}
 .who-line b{font-weight:600;white-space:nowrap}
 .who-line span{color:var(--muted)}
-.who-line.no b{color:var(--bad)} .who-line.ok b{color:var(--ok)} .who-line.pend b{color:var(--warn)}
+.who-line.no b{color:var(--bad)} .who-line.mid b{color:var(--accent)} .who-line.ok b{color:var(--ok)} .who-line.pend b{color:var(--warn)}
 .empty{text-align:center;color:var(--muted);padding:56px 0;font-size:12.5px}
 .empty .serif{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
 
@@ -171,7 +174,9 @@ table.mx{width:100%;border-collapse:collapse}
 .act.create{color:var(--c3);background:color-mix(in srgb,var(--c3) 12%,transparent)}
 .act.edit{color:var(--warn);background:var(--warn-soft)}
 .act.delete{color:var(--bad);background:var(--bad-soft)}
-.act.read{color:var(--accent);background:var(--accent-soft)}
+.act.read{color:var(--muted);background:var(--panel2)}
+.act.ack{color:var(--accent);background:var(--accent-soft)}
+.act.setting{color:var(--text);background:var(--panel2)}
 .act.done{color:var(--ok);background:var(--ok-soft)}
 .act.comment{color:var(--c2);background:color-mix(in srgb,var(--c2) 12%,transparent)}
 .lg .ref{font-weight:500;cursor:pointer}
@@ -207,9 +212,10 @@ table.mx{width:100%;border-collapse:collapse}
 .sec{margin-top:20px}
 .sec-t{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.split.three{grid-template-columns:repeat(3,1fr)}
 .box{background:var(--panel2);border-radius:8px;padding:9px 11px}
 .box h4{margin:0 0 6px;font-size:11.5px;font-weight:600;display:flex;justify-content:space-between}
-.box.ok h4{color:var(--ok)} .box.no h4{color:var(--bad)} .box.r h4{color:var(--accent)} .box.p h4{color:var(--warn)}
+.box.ok h4{color:var(--ok)} .box.no h4{color:var(--bad)} .box.r h4{color:var(--warn)} .box.a h4{color:var(--accent)} .box.p h4{color:var(--warn)}
 .box ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .box li{display:flex;align-items:center;gap:6px;font-size:12px}
 .box li small{margin-left:auto;color:var(--faint);font-size:10.5px;font-variant-numeric:tabular-nums}
@@ -226,7 +232,7 @@ table.mx{width:100%;border-collapse:collapse}
 .tl .ev{position:relative;padding:2px 0 9px}
 .tl .ev::before{content:"";position:absolute;left:-14px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--line2)}
 .tl .ev.create::before{background:var(--c3)} .tl .ev.edit::before{background:var(--warn)}
-.tl .ev.done::before{background:var(--ok)} .tl .ev.read::before{background:var(--accent)} .tl .ev.comment::before{background:var(--c2)}
+.tl .ev.done::before{background:var(--ok)} .tl .ev.read::before{background:var(--line2)} .tl .ev.ack::before{background:var(--accent)} .tl .ev.setting::before{background:var(--c5)} .tl .ev.comment::before{background:var(--c2)}
 .tl .ev .h{font-size:12px}
 .tl .ev .h small{color:var(--faint);margin-left:4px;font-size:11px;font-variant-numeric:tabular-nums}
 
@@ -265,7 +271,7 @@ table.mx{width:100%;border-collapse:collapse}
   .main{padding:16px 16px 50px}
   .band{grid-template-columns:repeat(2,1fr);gap:8px}
   .row{grid-template-columns:1fr;gap:8px;padding:11px 14px}
-  .chk{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:8px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px}
+  .chk{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:8px;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:4px 10px}
   .avs{width:100%}
   .search{min-width:0;flex:1 1 100%}
   .form,.split{grid-template-columns:1fr}
@@ -287,6 +293,23 @@ table.mx{width:100%;border-collapse:collapse}
 .login-card .hint{margin:4px 0 0;font-size:11px;color:var(--faint);text-align:center}
 .lg-err{font-size:12px;color:var(--bad);min-height:0}
 .lg-err:empty{display:none}
+
+.mystate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.mystate .seen{font-size:11.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;padding:5px 9px;background:var(--panel2);border-radius:6px}
+.mystate .seen b{color:var(--text);font-weight:600}
+.nav-t{display:flex;align-items:center;justify-content:space-between}
+.nav-t button{font-size:11px;color:var(--faint);padding:0 4px;border-radius:4px}
+.nav-t button:hover{color:var(--accent);background:var(--accent-soft)}
+.cats-ed{display:flex;flex-direction:column;gap:6px}
+.cat-row{display:grid;grid-template-columns:30px 1fr auto auto auto;gap:6px;align-items:center}
+.cat-row input[type=color]{width:30px;height:30px;padding:2px;border:1px solid var(--line2);border-radius:7px;background:var(--panel);cursor:pointer}
+.cat-row .cnt{font-size:11px;color:var(--faint);white-space:nowrap;min-width:48px;text-align:right}
+.cat-row.del .field[data-k=name]{text-decoration:line-through;color:var(--faint)}
+.cat-row .mv{grid-column:2/-1;font-size:11.5px;color:var(--bad);display:flex;align-items:center;gap:6px}
+.cat-row .mv select{padding:3px 6px}
+.swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;align-items:center;font-size:11px;color:var(--faint)}
+.swatches button{width:18px;height:18px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line2)}
+@media (max-width:860px){ .nav-t{display:none} .split.three{grid-template-columns:1fr} .cat-row{grid-template-columns:30px 1fr auto auto} .cat-row .cnt{display:none} }
 </style>
 </head>
 <body>
@@ -299,13 +322,14 @@ table.mx{width:100%;border-collapse:collapse}
     </div>
     <div class="nav-t">보기</div>
     <nav class="nav" id="navView"></nav>
-    <div class="nav-t">분류</div>
+    <div class="nav-t">분류<button id="catSetBtn" title="분류 메뉴 설정">설정</button></div>
     <nav class="nav" id="navCat"></nav>
     <div class="side-foot">
       <div class="status" id="status"><span class="dot"></span><span>연결 중</span></div>
       <div class="acct" id="acct"></div>
       <div class="btns">
         <button class="btn sm quiet" id="memBtn">팀원 관리</button>
+        <button class="btn sm quiet" id="catSetBtn2">메뉴 설정</button>
         <button class="btn sm quiet" id="themeBtn">다크</button>
       </div>
     </div>
@@ -358,7 +382,16 @@ const FIREBASE_CONFIG = {
 const P = "noticeboard";   // 컬렉션: noticeboard_notices / noticeboard_meta / noticeboard_log
 const LOG_LIMIT = 2000;    // 불러올 최근 이력 수
 
-const CATS = ["공지사항","학사공지","교육공지","자료정보","기타"];
+const PALETTE = ["#3b5bdb","#8b5cf6","#0e9f8c","#d9822b","#e03e3e","#0284c7","#db2777","#65a30d","#8a909c"];
+const DEFAULT_CATS = [
+  {id:"c1",name:"공지사항",color:"#3b5bdb"},{id:"c2",name:"학사공지",color:"#8b5cf6"},
+  {id:"c3",name:"교육공지",color:"#0e9f8c"},{id:"c4",name:"자료정보",color:"#d9822b"},{id:"c5",name:"기타",color:"#8a909c"}];
+const catList = () => (Store.settings.cats && Store.settings.cats.length ? Store.settings.cats : DEFAULT_CATS);
+const CATS = () => catList().map(c=>c.name);
+const catColor = name => (catList().find(c=>c.name===name) || {}).color || "#8a909c";
+const cs = name => `style="--cc:${esc(catColor(name))}"`;
+// 설정에 없는 분류를 쓰는 공지가 있으면 메뉴에도 보이게
+const navCats = () => { const L = CATS(); Store.notices.forEach(n => { if(n.cat && !L.includes(n.cat)) L.push(n.cat); }); return L; };
 const FIELDS = {cat:"분류",date:"게시일",title:"제목",body:"내용",links:"링크",important:"중요",needAction:"처리 필요",due:"처리 기한"};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -381,7 +414,7 @@ const clip = (s,n=5000) => { s = String(s ?? ""); return s.length > n ? s.slice(
    2) 저장소 — Firestore(실시간) / 체험 모드(localStorage)
    ========================================================= */
 const Store = (() => {
-  let notices = [], members = [], logs = [], listeners = [];
+  let notices = [], members = [], logs = [], settings = {}, listeners = [];
   const emit = () => listeners.forEach(f => f());
   let db = null;
   const col = n => db.collection(P + "_" + n);
@@ -393,10 +426,11 @@ const Store = (() => {
     unsubs = [
       col("notices").onSnapshot(s => { notices = s.docs.map(d => ({id:d.id, ...d.data()})); ok("공지"); emit(); }, onErr("공지")),
       col("meta").doc("members").onSnapshot(d => { members = (d.exists && d.data().list) || []; ok("팀원"); emit(); }, onErr("팀원")),
+      col("meta").doc("settings").onSnapshot(d => { settings = (d.exists && d.data()) || {}; ok("설정"); emit(); }, onErr("설정")),
       col("log").orderBy("at","desc").limit(LOG_LIMIT).onSnapshot(s => { logs = s.docs.map(d => ({id:d.id, ...d.data()})); ok("변경 이력"); emit(); }, onErr("변경 이력"))
     ];
   }
-  function unsubscribe(){ unsubs.forEach(f => { try{ f(); }catch(e){} }); unsubs = []; notices = []; members = []; logs = []; api.diag.errors = {}; api.diag.loaded = false; }
+  function unsubscribe(){ unsubs.forEach(f => { try{ f(); }catch(e){} }); unsubs = []; notices = []; members = []; logs = []; settings = {}; api.diag.errors = {}; api.diag.loaded = false; }
 
   async function initLive(){
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -415,16 +449,17 @@ const Store = (() => {
     const now = Date.now(), H = 3600e3, D = 24*H, t = today();
     const dd = n => ymd(now + n*D);
     members = ["김태욱","이서연","박준호"];
-    const a = {id:uid(),cat:"학사공지",date:t,title:"10월 개강반 시간표 확정 안내",body:"10월 개강반 시간표가 확정되었습니다.\n상담 시 변경된 시간표로 안내 부탁드립니다.\n토요반은 오전 10시 시작입니다.",links:"",important:true,needAction:true,due:dd(2),author:"김태욱",read:{"김태욱":now-3*H,"이서연":now-2*H},done:{"이서연":now-H},comments:[],createdAt:now-3*H,updatedAt:now-H*1.5,updatedBy:"김태욱"};
-    const b = {id:uid(),cat:"교육공지",date:t,title:"신규 멘토 온보딩 교육 (금 10시, 3층 세미나실)",body:"금요일 오전 10시 3층 세미나실에서 진행합니다.",links:"",important:false,needAction:false,due:"",author:"이서연",read:{"이서연":now-2*H},done:{},comments:[],createdAt:now-2*H};
-    const c = {id:uid(),cat:"자료정보",date:dd(-1),title:"국민내일배움카드 개편 요약 자료",body:"상담 시 참고하세요.",links:"https://www.hrd.go.kr",important:false,needAction:false,due:"",author:"박준호",read:{"김태욱":now-D+H,"이서연":now-D+2*H,"박준호":now-D},done:{},comments:[{by:"이서연",at:now-D+2*H,text:"상담 스크립트에 반영했습니다."}],createdAt:now-D};
-    const e = {id:uid(),cat:"공지사항",date:dd(-3),title:"9월 실적 마감 자료 제출",body:"각자 9월 실적 자료를 제출해 주세요.",links:"",important:true,needAction:true,due:dd(-1),author:"김태욱",read:{"김태욱":now-3*D,"이서연":now-3*D+H,"박준호":now-2*D},done:{"김태욱":now-2*D},comments:[],createdAt:now-3*D};
+    const a = {id:uid(),cat:"학사공지",date:t,title:"10월 개강반 시간표 확정 안내",body:"10월 개강반 시간표가 확정되었습니다.\n상담 시 변경된 시간표로 안내 부탁드립니다.\n토요반은 오전 10시 시작입니다.",links:"",important:true,needAction:true,due:dd(2),author:"김태욱",read:{"김태욱":now-3*H,"이서연":now-2*H,"박준호":now-H/2},ack:{"김태욱":now-3*H,"이서연":now-2*H+60e3},done:{"이서연":now-H},comments:[],createdAt:now-3*H,updatedAt:now-H*1.5,updatedBy:"김태욱"};
+    const b = {id:uid(),cat:"교육공지",date:t,title:"신규 멘토 온보딩 교육 (금 10시, 3층 세미나실)",body:"금요일 오전 10시 3층 세미나실에서 진행합니다.",links:"",important:false,needAction:false,due:"",author:"이서연",read:{"이서연":now-2*H},ack:{"이서연":now-2*H},done:{},comments:[],createdAt:now-2*H};
+    const c = {id:uid(),cat:"자료정보",date:dd(-1),title:"국민내일배움카드 개편 요약 자료",body:"상담 시 참고하세요.",links:"https://www.hrd.go.kr",important:false,needAction:false,due:"",author:"박준호",read:{"김태욱":now-D+H,"이서연":now-D+2*H,"박준호":now-D},ack:{"이서연":now-D+2*H,"박준호":now-D},done:{},comments:[{by:"이서연",at:now-D+2*H,text:"상담 스크립트에 반영했습니다."}],createdAt:now-D};
+    const e = {id:uid(),cat:"공지사항",date:dd(-3),title:"9월 실적 마감 자료 제출",body:"각자 9월 실적 자료를 제출해 주세요.",links:"",important:true,needAction:true,due:dd(-1),author:"김태욱",read:{"김태욱":now-3*D,"이서연":now-3*D+H,"박준호":now-2*D},ack:{"김태욱":now-3*D,"이서연":now-3*D+H,"박준호":now-2*D},done:{"김태욱":now-2*D},comments:[],createdAt:now-3*D};
     notices = [a,b,c,e];
     logs = [
       {id:uid(),at:now-H*1.5,by:"김태욱",type:"edit",noticeId:a.id,title:a.title,cat:a.cat,changes:[
         {f:"body",from:"10월 개강반 시간표가 확정되었습니다.\n상담 시 변경된 시간표로 안내 부탁드립니다.",to:a.body},
         {f:"due",from:dd(1),to:dd(2)}]},
       {id:uid(),at:now-H,by:"이서연",type:"done",noticeId:a.id,title:a.title,cat:a.cat},
+      {id:uid(),at:now-2*H+60e3,by:"이서연",type:"ack",noticeId:a.id,title:a.title,cat:a.cat},
       {id:uid(),at:now-2*H,by:"이서연",type:"read",noticeId:a.id,title:a.title,cat:a.cat},
       {id:uid(),at:now-2*H,by:"이서연",type:"create",noticeId:b.id,title:b.title,cat:b.cat},
       {id:uid(),at:now-3*H,by:"김태욱",type:"create",noticeId:a.id,title:a.title,cat:a.cat},
@@ -437,13 +472,14 @@ const Store = (() => {
     saveDemo();
   }
   function initDemo(){
-    notices = LS.get("nb2_notices", null);
-    members = LS.get("nb2_members", []);
-    logs = LS.get("nb2_logs", []);
+    notices = LS.get("nb3_notices", null);
+    members = LS.get("nb3_members", []);
+    settings = LS.get("nb3_settings", {});
+    logs = LS.get("nb3_logs", []);
     if(!notices) seed();
     setTimeout(emit,0);
   }
-  function saveDemo(){ LS.set("nb2_notices",notices); LS.set("nb2_members",members); LS.set("nb2_logs",logs); }
+  function saveDemo(){ LS.set("nb3_notices",notices); LS.set("nb3_members",members); LS.set("nb3_logs",logs); LS.set("nb3_settings",settings); }
 
   function logOf(type, n, by, extra){
     return {at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type, noticeId:n.id||"", title:clip(n.title,200), cat:n.cat||"", ...(extra||{})};
@@ -469,9 +505,29 @@ const Store = (() => {
     get notices(){ return notices; },
     get members(){ return members; },
     get logs(){ return logs; },
+    get settings(){ return settings; },
+    async saveCats(cats, renames, moves, by, changes){
+      // renames: [[old,new]], moves: [[old,target]] → 해당 분류를 쓰는 공지도 함께 변경
+      const map = {}; renames.concat(moves).forEach(([a,b]) => map[a] = b);
+      const targets = notices.filter(n => map[n.cat] != null);
+      if(api.live){
+        for(let i=0;i<targets.length;i+=400){
+          const bt = db.batch();
+          targets.slice(i,i+400).forEach(n => bt.update(col("notices").doc(n.id), {cat: map[n.cat]}));
+          await bt.commit();
+        }
+        await col("meta").doc("settings").set({cats}, {merge:true});
+      } else {
+        targets.forEach(n => n.cat = map[n.cat]);
+        settings = {...settings, cats};
+      }
+      if(changes.length) await writeLog({at:Date.now(), by:by||"", account:(api.user&&api.user.email)||"", type:"setting", noticeId:"", title:"분류 메뉴 변경", cat:"", changes});
+      if(!api.live){ saveDemo(); emit(); }
+      return targets.length;
+    },
 
     async createNotice(data, by){
-      const n = {...data, author:by||"", read: by?{[by]:Date.now()}:{}, done:{}, comments:[], createdAt:Date.now()};
+      const n = {...data, author:by||"", read: by?{[by]:Date.now()}:{}, ack: by?{[by]:Date.now()}:{}, done:{}, comments:[], createdAt:Date.now()};
       if(api.live){ const ref = await col("notices").add(n); n.id = ref.id; }
       else { n.id = uid(); notices.push(n); }
       await writeLog(logOf("create", n, by));
@@ -536,6 +592,8 @@ const M = () => Store.members;
 const isRead = (n,m) => !!(n.read && n.read[m]);
 const isDone = (n,m) => !!(n.done && n.done[m]);
 const myUnread = n => S.me && !isRead(n,S.me);
+const isAck = (n,m) => !!(n.ack && n.ack[m]);
+const myUnack = n => S.me && !isAck(n,S.me);
 const myTodo = n => S.me && n.needAction && !isDone(n,S.me);
 function dueState(n){
   if(!n.needAction || !n.due) return "";
@@ -563,6 +621,8 @@ function filteredNotices(ignoreCat){
     switch(S.state){
       case "unread": return myUnread(n);
       case "todo": return myTodo(n);
+      case "unack": return myUnack(n);
+      case "nack": return M().some(m=>!isAck(n,m));
       case "open": return n.needAction && M().some(m=>!isDone(n,m));
       case "miss": return M().some(m=>!isRead(n,m));
       case "over": return dueState(n)==="over";
@@ -574,7 +634,8 @@ function filteredNotices(ignoreCat){
 }
 const LOG_TYPES = {
   content:{label:"등록·수정·삭제", types:["create","edit","delete"]},
-  check:{label:"확인·처리", types:["read","done","undo"]},
+  check:{label:"확인·체크·처리", types:["read","ack","done","undo"]},
+  setting:{label:"설정·팀원", types:["setting","member"]},
   comment:{label:"댓글", types:["comment"]},
   all:{label:"전체 활동", types:null}
 };
@@ -665,17 +726,17 @@ function renderSide(){
   sel.innerHTML = `<option value="">이름 선택</option>` + M().map(m=>`<option ${m===S.me?"selected":""}>${esc(m)}</option>`).join("");
   $("#meAv").textContent = S.me ? initials(S.me) : "?";
 
-  const unread = S.me ? Store.notices.filter(myUnread).length : 0;
-  const miss = Store.notices.reduce((s,n)=>s+M().filter(m=>!isRead(n,m)).length,0);
+  const unread = S.me ? Store.notices.filter(myUnack).length : 0;
+  const miss = Store.notices.reduce((s,n)=>s+M().filter(m=>!isAck(n,m)).length,0);
   const todayLogs = Store.logs.filter(l=>ymd(l.at)===today() && ["create","edit","delete"].includes(l.type)).length;
   const views = [["list","☰","공지 목록",unread,unread>0],["matrix","◫","누락 현황",miss,false],["log","↻","변경 이력",todayLogs?`오늘 ${todayLogs}`:"",false]];
   $("#navView").innerHTML = views.map(([k,ic,l,c,hot]) =>
     `<button class="${S.view===k?"on":""}" data-view="${k}"><span class="ic">${ic}</span>${l}<span class="ct ${hot?"hot":""}">${c||""}</span></button>`).join("");
 
   const base = Store.notices;
-  $("#navCat").innerHTML = ["전체",...CATS].map(c => {
+  $("#navCat").innerHTML = ["전체",...navCats()].map(c => {
     const n = c==="전체" ? base.length : base.filter(x=>x.cat===c).length;
-    return `<button class="${S.cat===c?"on":""}" data-cat="${c}" ${c!=="전체"?`data-c="${c}"`:""}>
+    return `<button class="${S.cat===c?"on":""}" data-cat="${c}" ${c!=="전체"?cs(c):""}>
       <span class="ic">${c==="전체"?"·":`<span class="dot" style="background:var(--cc)"></span>`}</span>${c}<span class="ct">${n}</span></button>`;
   }).join("");
 
@@ -702,15 +763,16 @@ function renderBand(){
       <button data-logtype="content"><div class="k">오늘 등록</div><div class="v num">${c("create")}<small>건</small></div></button>
       <button data-logtype="content"><div class="k">오늘 수정</div><div class="v num">${c("edit")}<small>건</small></div></button>
       <button data-logtype="content"><div class="k">오늘 삭제</div><div class="v num">${c("delete")}<small>건</small></div></button>
-      <button data-logtype="check"><div class="k">오늘 체크</div><div class="v num">${c("read")+c("done")}<small>회</small></div></button></div>`;
+      <button data-logtype="check"><div class="k">오늘 체크·처리</div><div class="v num">${c("ack")+c("done")}<small>회</small></div></button></div>`;
     return;
   }
   const all = Store.notices, dash = v => S.me ? v : "–";
   $("#bandWrap").innerHTML = `<div class="band">
     <button data-state="unread"><div class="k">내 미확인</div><div class="v num">${dash(all.filter(myUnread).length)}<small>건</small></div></button>
+    <button data-state="unack"><div class="k">내 미체크</div><div class="v num" style="color:var(--accent)">${dash(all.filter(myUnack).length)}<small>건</small></div></button>
     <button data-state="todo" class="warn"><div class="k">내 처리 대기</div><div class="v num">${dash(all.filter(myTodo).length)}<small>건</small></div></button>
     <button data-state="over" class="bad"><div class="k">기한 지난 미완료</div><div class="v num">${all.filter(n=>dueState(n)==="over").length}<small>건</small></div></button>
-    <button data-state="week"><div class="k">이번 주 게시</div><div class="v num">${all.filter(n=>(n.date||"")>=weekStart()).length}<small>건</small></div></button></div>`;
+</div>`;
 }
 
 function renderToolbar(){
@@ -729,29 +791,33 @@ function renderToolbar(){
   if(S.view==="log"){
     chips = Object.entries(LOG_TYPES).map(([k,v])=>`<button class="chip ${S.logType===k?"on":""}" data-logtype="${k}">${v.label}</button>`).join("");
   } else {
-    const st = [["all","전체"],["unread","내 미확인"],["todo","내 처리 대기"],["miss","미확인자 있음"],["open","처리 미완료"],["over","기한 지남"],["imp","중요"],["week","이번 주"]];
+    const st = [["all","전체"],["unread","내 미확인"],["unack","내 미체크"],["todo","내 처리 대기"],["nack","미체크자 있음"],["miss","미확인자 있음"],["open","처리 미완료"],["over","기한 지남"],["imp","중요"],["week","이번 주"]];
     chips = st.map(([k,l])=>`<button class="chip ${S.state===k?"on":""}" data-state="${k}">${l}</button>`).join("");
   }
   $("#chips").innerHTML = chips;
 }
 
+function avCls(n,m){ return n.needAction && isDone(n,m) ? "d" : isAck(n,m) ? "a" : isRead(n,m) ? "r" : ""; }
 function checkBlock(n){
   const mem = M();
   if(!mem.length) return `<div class="chk"><span class="who-line"><span>팀원을 추가하면 체크 현황이 보입니다</span></span></div>`;
-  const read = mem.filter(m=>isRead(n,m)), unread = mem.filter(m=>!isRead(n,m));
-  const done = mem.filter(m=>isDone(n,m)), notDone = mem.filter(m=>!isDone(n,m));
-  const avs = mem.map(m => av(m, isDone(n,m)&&n.needAction ? "d" : isRead(n,m) ? "r" : "")).join("");
+  const unread = mem.filter(m=>!isRead(n,m));
+  const seenOnly = mem.filter(m=>isRead(n,m) && !isAck(n,m));
+  const acked = mem.filter(m=>isAck(n,m));
+  const notDone = mem.filter(m=>!isDone(n,m));
   let lines = "";
-  lines += unread.length
-    ? `<div class="who-line no"><b>미확인 ${unread.length}</b><span>${esc(nameList(unread))}</span></div>`
-    : `<div class="who-line ok"><b>전원 확인</b><span>${read.length}명</span></div>`;
-  if(unread.length && read.length) lines += `<div class="who-line"><b>확인 ${read.length}</b><span>${esc(nameList(read))}</span></div>`;
+  if(!unread.length && !seenOnly.length) lines += `<div class="who-line ok"><b>전원 체크</b><span>${acked.length}명</span></div>`;
+  else {
+    if(unread.length) lines += `<div class="who-line no"><b>미확인 ${unread.length}</b><span>${esc(nameList(unread))}</span></div>`;
+    if(seenOnly.length) lines += `<div class="who-line pend"><b>확인만 ${seenOnly.length}</b><span>${esc(nameList(seenOnly))}</span></div>`;
+    if(acked.length) lines += `<div class="who-line mid"><b>체크 ${acked.length}</b><span>${esc(nameList(acked))}</span></div>`;
+  }
   if(n.needAction){
     lines += notDone.length
-      ? `<div class="who-line pend"><b>미처리 ${notDone.length}</b><span>${esc(nameList(notDone))}</span></div>`
+      ? `<div class="who-line no"><b>미처리 ${notDone.length}</b><span>${esc(nameList(notDone))}</span></div>`
       : `<div class="who-line ok"><b>전원 처리완료</b></div>`;
   }
-  return `<div class="chk"><div class="avs">${avs}</div>${lines}</div>`;
+  return `<div class="chk"><div class="avs">${mem.map(m=>av(m, avCls(n,m))).join("")}</div>${lines}</div>`;
 }
 
 function renderList(){
@@ -764,11 +830,11 @@ function renderList(){
       <div class="day-h"><h3>${d?dayTitle(d):"날짜 없음"}</h3>${d&&dayRel(d)?`<span class="rel">${dayRel(d)}</span>`:""}<span class="cnt">${groups[d].length}건</span></div>
       <div class="card">${groups[d].map(n => {
         const ds = dueState(n);
-        const cls = ds==="over" ? "over" : myUnread(n) ? "unread" : "";
-        const mine = S.me ? (n.needAction && isDone(n,S.me) ? `<span class="flag done">내 처리완료</span>` : isRead(n,S.me) ? "" : `<span class="flag mine">NEW</span>`) : "";
+        const cls = ds==="over" ? "over" : myUnack(n) ? "unread" : "";
+        const mine = !S.me ? "" : !isRead(n,S.me) ? `<span class="flag mine">NEW</span>` : !isAck(n,S.me) ? `<span class="flag need">체크 필요</span>` : (n.needAction && isDone(n,S.me)) ? `<span class="flag done">내 처리완료</span>` : "";
         return `<div class="row ${cls}" data-open="${n.id}">
           <div>
-            <span class="cat" data-c="${esc(n.cat)}"><span class="dot"></span>${esc(n.cat)}</span>
+            <span class="cat" ${cs(n.cat)}><span class="dot"></span>${esc(n.cat)}</span>
             <div class="tt">${mine}${n.important?`<span class="flag imp">중요</span>`:""}${n.needAction?`<span class="flag act">처리 필요</span>`:""}${esc(n.title)}</div>
             <div class="meta">
               <span>${esc(n.author||"작성자 미상")}</span>
@@ -790,28 +856,31 @@ function renderMatrix(){
   if(!mem.length){ $("#view").innerHTML = `<div class="empty"><div class="serif">팀원이 없습니다</div>'팀원 관리'에서 먼저 추가하세요.</div>`; return; }
   const cards = mem.map(m => {
     const u = list.filter(n=>!isRead(n,m)).length;
+    const k = list.filter(n=>!isAck(n,m)).length;
     const t = list.filter(n=>n.needAction && !isDone(n,m)).length;
     const o = list.filter(n=>n.needAction && !isDone(n,m) && n.due && n.due < today()).length;
-    return `<div class="tm"><div class="nm">${av(m, u? "" : "r")}${esc(m)}</div>
-      <div class="kv">미확인<b class="${u?"w":""}">${u}</b></div>
+    return `<div class="tm"><div class="nm">${av(m, k? "" : "a")}${esc(m)}</div>
+      <div class="kv">미확인<b class="${u?"xx":""}">${u}</b></div>
+      <div class="kv">미체크<b class="${k?"w":""}">${k}</b></div>
       <div class="kv">처리 대기<b class="${t?"w":""}">${t}</b></div>
       <div class="kv">기한 지남<b class="${o?"xx":""}">${o}</b></div></div>`;
   }).join("");
   const rows = list.map(n => `<tr>
     <td class="l num">${esc((n.date||"").slice(5).replace("-","/"))}</td>
-    <td class="l"><span class="cat" data-c="${esc(n.cat)}"><span class="dot"></span>${esc(n.cat)}</span></td>
+    <td class="l"><span class="cat" ${cs(n.cat)}><span class="dot"></span>${esc(n.cat)}</span></td>
     <td class="l t" data-open="${n.id}">${n.important?`<span class="flag imp">중요</span>`:""}${esc(n.title)}</td>
     ${mem.map(m => {
-      const r=isRead(n,m), d=isDone(n,m);
+      const r=isRead(n,m), k=isAck(n,m), d=isDone(n,m);
       const c = !r ? `<span class="mk no">미확인</span>`
-        : n.needAction ? (d ? `<span class="mk d" title="처리 ${esc(stamp(n.done[m]))}">완료</span>` : `<span class="mk r" title="확인 ${esc(stamp(n.read[m]))}">확인·미처리</span>`)
-        : `<span class="mk r" title="확인 ${esc(stamp(n.read[m]))}">확인</span>`;
+        : !k ? `<span class="mk" title="확인 ${esc(stamp(n.read[m]))}" style="color:var(--warn);background:var(--warn-soft)">확인만</span>`
+        : n.needAction ? (d ? `<span class="mk d" title="처리 ${esc(stamp(n.done[m]))}">처리완료</span>` : `<span class="mk r" title="체크 ${esc(stamp(n.ack[m]))}">체크·미처리</span>`)
+        : `<span class="mk r" title="체크 ${esc(stamp(n.ack[m]))}">체크</span>`;
       return `<td>${c}</td>`;
     }).join("")}</tr>`).join("");
   $("#view").innerHTML = `<div class="team">${cards}</div>
     <div class="card tbl-wrap"><table class="mx"><thead><tr><th class="l">게시일</th><th class="l">분류</th><th class="l">제목</th>${mem.map(m=>`<th>${esc(m)}</th>`).join("")}</tr></thead>
     <tbody>${rows || `<tr><td colspan="${3+mem.length}" class="empty">공지가 없습니다</td></tr>`}</tbody></table></div>
-    <p class="note">칸에 마우스를 올리면 체크한 시각이 보입니다. 위쪽 필터가 이 표에도 똑같이 적용됩니다.</p>`;
+    <p class="note">확인은 공지를 열어 본 것, 체크는 내용을 인지했다고 누른 것입니다. 칸에 마우스를 올리면 시각이 보입니다. 위쪽 필터가 이 표에도 똑같이 적용됩니다.</p>`;
 }
 
 /* --- 변경 이력 --- */
@@ -849,11 +918,11 @@ function changesHTML(changes){
     return `<div><span class="f">${FIELDS[c.f]||c.f}</span><del>${esc(fmtVal(c.f,c.from))}</del> → <ins>${esc(fmtVal(c.f,c.to))}</ins></div>`;
   }).join("")}</div>`;
 }
-const ACT = {create:"등록",edit:"수정",delete:"삭제",read:"확인",done:"처리완료",undo:"체크 취소",comment:"댓글",member:"팀원"};
+const ACT = {create:"등록",edit:"수정",delete:"삭제",read:"확인",ack:"체크",done:"처리완료",undo:"취소",comment:"댓글",member:"팀원",setting:"설정"};
 function logDetail(l){
-  if(l.type==="edit") return changesHTML(l.changes);
+  if(l.type==="edit" || l.type==="setting") return changesHTML(l.changes);
   if(l.type==="comment") return `<div class="quote">${esc(l.text)}</div>`;
-  if(l.type==="undo") return `<div class="meta" style="margin-top:4px">${l.what==="done"?"처리완료":"확인"} 체크를 취소했습니다</div>`;
+  if(l.type==="undo") return `<div class="meta" style="margin-top:4px">${({done:"처리완료",ack:"체크",read:"확인"})[l.what]||"체크"}를 취소했습니다</div>`;
   if(l.type==="delete" && l.snapshot && l.snapshot.body) return `<div class="quote">${esc(l.snapshot.body.slice(0,300))}${l.snapshot.body.length>300?"…":""}</div>`;
   return "";
 }
@@ -865,7 +934,7 @@ function renderLog(){
   const exists = id => Store.notices.some(n=>n.id===id);
   $("#view").innerHTML = Object.keys(groups).sort().reverse().map(d => {
     const g = groups[d], cnt = t => g.filter(l=>l.type===t).length;
-    const sum = [["create","등록"],["edit","수정"],["delete","삭제"],["read","확인"],["done","처리"],["comment","댓글"]]
+    const sum = [["create","등록"],["edit","수정"],["delete","삭제"],["read","확인"],["ack","체크"],["done","처리"],["setting","설정"],["comment","댓글"]]
       .filter(([t])=>cnt(t)).map(([t,l])=>`${l} ${cnt(t)}`).join(" · ");
     return `<section class="day">
       <div class="day-h"><h3>${dayTitle(d)}</h3>${dayRel(d)?`<span class="rel">${dayRel(d)}</span>`:""}<span class="cnt">${sum}</span></div>
@@ -874,10 +943,10 @@ function renderLog(){
         return `<div class="lg">
           <div class="tm2">${hm(l.at)}</div>
           <div>
-            <div class="top">${av(l.by||"?", "r")}<span class="by" title="${esc(l.account||"")}">${esc(l.by||"이름 없음")}</span>
+            <div class="top">${av(l.by||"?", "n")}<span class="by" title="${esc(l.account||"")}">${esc(l.by||"이름 없음")}</span>
               <span class="act ${l.type}">${ACT[l.type]||l.type}</span>
-              ${l.cat?`<span class="cat" data-c="${esc(l.cat)}"><span class="dot"></span>${esc(l.cat)}</span>`:""}
-              <span class="ref ${l.type==="member"?"":alive?"":"gone"}" ${alive?`data-open="${l.noticeId}"`:""}>${esc(l.title)}</span>
+              ${l.cat?`<span class="cat" ${cs(l.cat)}><span class="dot"></span>${esc(l.cat)}</span>`:""}
+              <span class="ref ${l.type==="member"||l.type==="setting"?"":alive?"":"gone"}" ${alive?`data-open="${l.noticeId}"`:""}>${esc(l.title)}</span>
             </div>
             ${logDetail(l)}
           </div></div>`;
@@ -898,14 +967,14 @@ function renderDrawer(id, refresh){
   const links = (n.links||"").split(/\n+/).map(s=>s.trim()).filter(Boolean)
     .map(u => /^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>` : `<span>${esc(u)}</span>`).join("");
   const box = (cls, title, names, map) => `<div class="box ${cls}"><h4><span>${title}</span><span>${names.length}명</span></h4>
-    ${names.length ? `<ul>${names.map(m=>`<li>${av(m, cls==="ok"?"d":cls==="r"?"r":"")}${esc(m)}${map&&map[m]?`<small>${esc(stamp(map[m]))}</small>`:""}</li>`).join("")}</ul>` : `<div class="none">없음</div>`}</div>`;
-  const read = mem.filter(m=>isRead(n,m)), unread = mem.filter(m=>!isRead(n,m));
+    ${names.length ? `<ul>${names.map(m=>`<li>${av(m, cls==="ok"?"d":cls==="a"?"a":cls==="r"?"r":"")}${esc(m)}${map&&map[m]?`<small>${esc(stamp(map[m]))}</small>`:""}</li>`).join("")}</ul>` : `<div class="none">없음</div>`}</div>`;
+  const unread = mem.filter(m=>!isRead(n,m)), seenOnly = mem.filter(m=>isRead(n,m)&&!isAck(n,m)), acked = mem.filter(m=>isAck(n,m));
   const done = mem.filter(m=>isDone(n,m)), notDone = mem.filter(m=>!isDone(n,m));
   const hist = Store.logs.filter(l=>l.noticeId===id).sort((a,b)=>b.at-a.at);
 
   $("#drawer").innerHTML = `
     <div class="dr-h">
-      <div class="top"><span class="cat" data-c="${esc(n.cat)}"><span class="dot"></span>${esc(n.cat)}</span>
+      <div class="top"><span class="cat" ${cs(n.cat)}><span class="dot"></span>${esc(n.cat)}</span>
         ${n.important?`<span class="flag imp">중요</span>`:""}${n.needAction?`<span class="flag act">처리 필요</span>`:""}
         <button class="x" data-close>×</button></div>
       <h2>${esc(n.title)}</h2>
@@ -914,22 +983,23 @@ function renderDrawer(id, refresh){
         ${n.updatedAt?`<span class="edited">최종 수정 ${mdhm(n.updatedAt)} · ${esc(n.updatedBy||"")}</span>`:""}
         ${n.needAction&&n.due?`<span class="due ${ds}">기한 ${esc(n.due)}${ds==="over"?" (지남)":""}</span>`:""}
       </div>
-      <div class="mybar">${S.me ? `
-        <button class="btn ${isRead(n,S.me)?"on-r":"primary"}" data-mark="read" data-id="${n.id}" title="${isRead(n,S.me)?"다시 누르면 취소됩니다":""}">${isRead(n,S.me)?"✓ 확인함":"확인했습니다"}</button>
-        ${n.needAction?`<button class="btn ${isDone(n,S.me)?"on-d":"ok"}" data-mark="done" data-id="${n.id}" title="${isDone(n,S.me)?"다시 누르면 취소됩니다":""}">${isDone(n,S.me)?"✓ 처리완료함":"처리완료"}</button>`:""}`
-        : `<span class="meta">현재 사용자를 선택하면 체크할 수 있습니다</span>`}</div>
+      ${S.me ? `<div class="mystate">
+        <span class="seen">${isRead(n,S.me) ? `확인 <b>${esc(stamp(n.read[S.me]))}</b>` : "미확인"}</span>
+        <button class="btn ${isAck(n,S.me)?"on-r":"primary"}" data-mark="ack" data-id="${n.id}" title="${isAck(n,S.me)?"다시 누르면 체크가 취소됩니다":"내용을 확인하고 인지했으면 누르세요"}">${isAck(n,S.me)?"✓ 체크함":"인지했어요 · 체크"}</button>
+        ${n.needAction?`<button class="btn ${isDone(n,S.me)?"on-d":"ok"}" data-mark="done" data-id="${n.id}" title="${isDone(n,S.me)?"다시 누르면 취소됩니다":""}">${isDone(n,S.me)?"✓ 처리완료함":"처리완료"}</button>`:""}
+      </div>` : `<div class="mystate"><span class="meta">현재 사용자를 선택하면 확인·체크가 기록됩니다</span></div>`}
     </div>
     <div class="dr-b">
       <div class="body">${esc(n.body||"(내용 없음)")}</div>
       ${links?`<div class="links">${links}</div>`:""}
 
-      <div class="sec"><div class="sec-t">확인 현황</div>
-        <div class="split">${box("no","미확인",unread)}${box("r","확인함",read,n.read)}</div></div>
+      <div class="sec"><div class="sec-t">확인 · 체크 현황 <span style="font-weight:400;color:var(--faint)">확인 = 열어 봄 · 체크 = 인지함</span></div>
+        <div class="split three">${box("no","미확인",unread)}${box("r","확인만",seenOnly,n.read)}${box("a","체크",acked,n.ack)}</div></div>
       ${n.needAction?`<div class="sec"><div class="sec-t">처리 현황</div>
         <div class="split">${box("p","미처리",notDone)}${box("ok","처리완료",done,n.done)}</div></div>`:""}
 
       <div class="sec"><div class="sec-t">댓글 ${(n.comments||[]).length}</div>
-        ${(n.comments||[]).map(c=>`<div class="cm"><div class="h">${av(c.by,"r")}<b>${esc(c.by)}</b><small>${esc(stamp(c.at))}</small></div><p>${esc(c.text)}</p></div>`).join("")}
+        ${(n.comments||[]).map(c=>`<div class="cm"><div class="h">${av(c.by,"n")}<b>${esc(c.by)}</b><small>${esc(stamp(c.at))}</small></div><p>${esc(c.text)}</p></div>`).join("")}
         <div class="cm-in"><input class="field" id="cmIn" placeholder="${S.me?"처리 내용·질문을 남기세요":"현재 사용자를 먼저 선택하세요"}" ${S.me?"":"disabled"}>
         <button class="btn" data-cmt="${n.id}" ${S.me?"":"disabled"}>등록</button></div></div>
 
@@ -946,7 +1016,11 @@ function renderDrawer(id, refresh){
     </div>`;
   if(draft) $("#cmIn").value = draft;
   if(scroll) $(".dr-b").scrollTop = scroll;
-  if(!refresh) openDrawer();
+  if(!refresh){
+    openDrawer();
+    // 열어 보면 '확인'이 자동 기록됨
+    if(S.me && !isRead(n,S.me)) Store.setMark(n.id, "read", S.me, true).catch(fail);
+  }
 }
 
 /* --- 등록/수정 --- */
@@ -954,11 +1028,11 @@ function openModal(html){ $("#modal").innerHTML = html; $("#mw").classList.add("
 function closeModal(){ $("#mw").classList.remove("on"); }
 function renderForm(id){
   const n = id ? Store.notices.find(x=>x.id===id)
-    : {cat:S.cat!=="전체"?S.cat:"공지사항", date:today(), title:"", body:"", links:"", important:false, needAction:false, due:""};
+    : {cat:S.cat!=="전체"?S.cat:CATS()[0], date:today(), title:"", body:"", links:"", important:false, needAction:false, due:""};
   openModal(`
     <div class="mh"><h2>${id?"공지 수정":"새 공지 등록"}</h2><button class="x" data-mclose>×</button></div>
     <div class="mb"><form class="form" id="nf" onsubmit="return false">
-      <label>분류<select class="field" name="cat">${CATS.map(c=>`<option ${c===n.cat?"selected":""}>${c}</option>`).join("")}</select></label>
+      <label>분류<select class="field" name="cat">${[...new Set([...CATS(), n.cat].filter(Boolean))].map(c=>`<option ${c===n.cat?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
       <label>게시일<input class="field" type="date" name="date" value="${esc(n.date)}" required></label>
       <label class="full">제목<input class="field" name="title" value="${esc(n.title)}" required placeholder="공지 제목"></label>
       <label class="full">내용<textarea class="field" name="body" placeholder="원문 공지를 그대로 붙여넣어도 됩니다">${esc(n.body)}</textarea></label>
@@ -995,12 +1069,96 @@ function fail(e){
   if(/permission-denied/.test(c)){ Store.diag.errors["저장"] = c; render(); }
 }
 
+/* --- 메뉴(분류) 설정 --- */
+let CE = [];   // 편집 중인 분류 목록
+function openCatSettings(){
+  CE = catList().map(c => ({...c, orig:c.name, origColor:c.color, del:false, moveTo:""}));
+  navCats().forEach(nm => { if(!CE.some(c=>c.orig===nm)) CE.push({id:uid(), name:nm, color:"#8a909c", orig:nm, origColor:null, del:false, moveTo:""}); });
+  $("#modal").innerHTML = "";
+  renderCatSettings();
+}
+function syncCE(){
+  document.querySelectorAll("#catEd .cat-row").forEach(row => {
+    const r = CE[+row.dataset.i]; if(!r) return;
+    r.name = row.querySelector("[data-k=name]").value;
+    r.color = row.querySelector("[data-k=color]").value;
+    const mv = row.querySelector("[data-k=move]"); if(mv) r.moveTo = mv.value;
+  });
+}
+function renderCatSettings(){
+  const use = nm => Store.notices.filter(n=>n.cat===nm).length;
+  const alive = CE.filter(r=>!r.del).map(r=>r.name.trim()).filter(Boolean);
+  const last = CE.length - 1;
+  openModal(`
+    <div class="mh"><h2>분류 메뉴 설정</h2><button class="x" data-mclose>×</button></div>
+    <div class="mb">
+      <div class="cats-ed" id="catEd">${CE.map((r,i)=>{
+        const cnt = r.orig ? use(r.orig) : 0;
+        return `<div class="cat-row ${r.del?"del":""}" data-i="${i}">
+          <input type="color" data-k="color" value="${esc(r.color)}" title="색상">
+          <input class="field" data-k="name" value="${esc(r.name)}" placeholder="분류 이름" ${r.del?"disabled":""}>
+          <span class="cnt">${r.orig?`공지 ${cnt}건`:"새 분류"}</span>
+          <span style="display:flex;gap:2px"><button class="btn sm quiet" data-cup="${i}" ${i?"":"disabled"} title="위로">▲</button><button class="btn sm quiet" data-cdn="${i}" ${i<last?"":"disabled"} title="아래로">▼</button></span>
+          <button class="btn sm quiet ${r.del?"":"danger"}" data-cdel="${i}">${r.del?"되살리기":"삭제"}</button>
+          ${r.del && cnt ? `<div class="mv">공지 ${cnt}건을 옮길 분류
+            <select class="field" data-k="move">${alive.map(a=>`<option ${a===r.moveTo?"selected":""}>${esc(a)}</option>`).join("")}</select></div>` : ""}
+        </div>`;
+      }).join("")}</div>
+      <div class="cm-in" style="margin-top:14px"><input class="field" id="catNew" placeholder="새 분류 이름 (예: 상담공지)"><button class="btn" id="catAdd">추가</button></div>
+      ${last>=0?`<div class="swatches">맨 아래 분류 색 ${PALETTE.map(c=>`<button style="background:${c}" data-sw="${c}" data-swi="${last}" title="${c}"></button>`).join("")}</div>`:""}
+      <p class="note">왼쪽 색 칸을 눌러 색을 바꿀 수 있습니다. 이름을 바꾸면 그 분류의 공지도 함께 바뀌고, 공지가 있는 분류를 삭제하면 고른 분류로 옮겨집니다. 변경 내용은 '변경 이력 › 설정·팀원'에 남습니다.</p>
+    </div>
+    <div class="mf"><button class="btn quiet" data-mclose>취소</button><button class="btn primary" id="catSave">저장</button></div>`);
+}
+function catAdd(){
+  syncCE();
+  const v = $("#catNew").value.trim(); if(!v) return;
+  if(CE.some(r=>!r.del && r.name.trim()===v)) return toast("이미 있는 분류입니다");
+  CE.push({id:uid(), name:v, color:PALETTE[CE.length % PALETTE.length], orig:null, origColor:null, del:false, moveTo:""});
+  renderCatSettings(); setTimeout(()=>$("#catNew")&&$("#catNew").focus(),20);
+}
+async function catSave(){
+  syncCE();
+  const keep = CE.filter(r=>!r.del);
+  const names = keep.map(r=>r.name.trim());
+  if(!keep.length) return toast("분류는 하나 이상 있어야 합니다");
+  if(names.some(n=>!n)) return toast("비어 있는 분류 이름이 있습니다");
+  if(new Set(names).size !== names.length) return toast("같은 이름의 분류가 있습니다");
+  const use = nm => Store.notices.filter(n=>n.cat===nm).length;
+  const renames = [], moves = [], changes = [];
+  keep.forEach(r => {
+    const nm = r.name.trim();
+    if(!r.orig) changes.push({f:"분류 추가", from:"", to:nm});
+    else {
+      if(nm !== r.orig){ renames.push([r.orig, nm]); changes.push({f:"이름 변경", from:r.orig, to:nm}); }
+      if(r.origColor && r.color.toLowerCase() !== r.origColor.toLowerCase()) changes.push({f:"색상("+nm+")", from:r.origColor, to:r.color});
+    }
+  });
+  CE.filter(r=>r.del && r.orig).forEach(r => {
+    const cnt = use(r.orig);
+    const to = names.includes(r.moveTo) ? r.moveTo : names[0];
+    if(cnt) moves.push([r.orig, to]);
+    changes.push({f:"분류 삭제", from:r.orig, to: cnt ? `공지 ${cnt}건 → ${to}` : "(삭제됨)"});
+  });
+  const oldOrder = catList().map(c=>c.name).join(" › "), newOrder = names.join(" › ");
+  if(oldOrder !== newOrder && !changes.length) changes.push({f:"메뉴 순서", from:oldOrder, to:newOrder});
+  else if(oldOrder !== newOrder) changes.push({f:"메뉴 구성", from:oldOrder, to:newOrder});
+  const cats = keep.map(r => ({id:r.id||uid(), name:r.name.trim(), color:r.color}));
+  const btn = $("#catSave"); btn.disabled = true;
+  try{
+    const moved = await Store.saveCats(cats, renames, moves, S.me, changes);
+    if(S.cat!=="전체" && !names.includes(S.cat)) S.cat = "전체";
+    closeModal(); render();
+    toast(moved ? `저장했습니다 · 공지 ${moved}건의 분류도 변경` : "메뉴를 저장했습니다");
+  }catch(e){ btn.disabled = false; fail(e); }
+}
+
 /* --- 팀원 --- */
 function renderMembers(){
   openModal(`
     <div class="mh"><h2>팀원 관리</h2><button class="x" data-mclose>×</button></div>
     <div class="mb">
-      <div class="mem">${M().map((m,i)=>`<div>${av(m,"r")}<span>${esc(m)}</span>
+      <div class="mem">${M().map((m,i)=>`<div>${av(m,"n")}<span>${esc(m)}</span>
         <button class="btn sm quiet" data-mup="${i}" ${i?"":"disabled"}>위로</button>
         <button class="btn sm quiet danger" data-mdel="${i}">삭제</button></div>`).join("") || `<p class="meta">아직 팀원이 없습니다.</p>`}</div>
       <div class="cm-in" style="margin-top:16px"><input class="field" id="memIn" placeholder="이름 입력 후 Enter"><button class="btn primary" id="memAdd">추가</button></div>
@@ -1023,7 +1181,7 @@ async function addMember(){
    5) 이벤트
    ========================================================= */
 document.addEventListener("click", async e => {
-  const el = e.target.closest("[data-close],[data-mclose],[data-open],[data-view],[data-cat],[data-state],[data-logtype],[data-mark],[data-cmt],[data-edit],[data-del],[data-mup],[data-mdel],button");
+  const el = e.target.closest("[data-close],[data-mclose],[data-open],[data-view],[data-cat],[data-state],[data-logtype],[data-mark],[data-cmt],[data-edit],[data-del],[data-mup],[data-mdel],[data-cup],[data-cdn],[data-cdel],[data-sw],button");
   if(e.target.id==="scrim") return closeDrawer();
   if(e.target.id==="mw") return closeModal();
   if(!el) return;
@@ -1039,8 +1197,9 @@ document.addEventListener("click", async e => {
     const n = Store.notices.find(x=>x.id===D.id), k = D.mark, on = !(n[k] && n[k][S.me]);
     try{
       await Store.setMark(n.id, k, S.me, on);
-      if(k==="done" && on && !isRead(n,S.me)) await Store.setMark(n.id, "read", S.me, true);
-      toast(on ? (k==="read" ? "확인으로 체크했습니다" : "처리완료로 체크했습니다") : "체크를 취소했습니다");
+      if(on && (k==="ack"||k==="done") && !isRead(n,S.me)) await Store.setMark(n.id, "read", S.me, true);
+      if(on && k==="done" && !isAck(n,S.me)) await Store.setMark(n.id, "ack", S.me, true);
+      toast(on ? (k==="ack" ? "체크했습니다" : "처리완료로 표시했습니다") : (k==="ack" ? "체크를 취소했습니다" : "처리완료를 취소했습니다"));
     }catch(err){ fail(err); }
     return;
   }
@@ -1062,6 +1221,10 @@ document.addEventListener("click", async e => {
     if(!confirm(name + " 님을 팀원 목록에서 뺄까요?")) return;
     await Store.setMembers(M().filter(m=>m!==name), S.me, `팀원 삭제: ${name}`); renderMembers(); return;
   }
+  if(D.cup){ syncCE(); const i=+D.cup; if(i>0){ [CE[i-1],CE[i]]=[CE[i],CE[i-1]]; renderCatSettings(); } return; }
+  if(D.cdn){ syncCE(); const i=+D.cdn; if(i<CE.length-1){ [CE[i+1],CE[i]]=[CE[i],CE[i+1]]; renderCatSettings(); } return; }
+  if(D.cdel){ syncCE(); const i=+D.cdel, r=CE[i]; if(!r.orig) CE.splice(i,1); else r.del=!r.del; renderCatSettings(); return; }
+  if(D.sw){ syncCE(); const r=CE[+D.swi]; if(r){ r.color = D.sw; renderCatSettings(); } return; }
   if(D.mup){
     const i = +D.mup, L = [...M()]; [L[i-1],L[i]] = [L[i],L[i-1]];
     await Store.setMembers(L); renderMembers(); return;
@@ -1073,6 +1236,9 @@ document.addEventListener("click", async e => {
     case "logoutBtn": if(confirm("로그아웃할까요?")) { closeDrawer(); await Store.logout(); } return;
     case "newBtn": return renderForm();
     case "memBtn": return renderMembers();
+    case "catSetBtn": case "catSetBtn2": return openCatSettings();
+    case "catAdd": return catAdd();
+    case "catSave": return catSave();
     case "memAdd": return addMember();
     case "themeBtn": return setTheme(document.documentElement.dataset.theme==="dark" ? "light" : "dark");
   }
@@ -1081,6 +1247,7 @@ document.addEventListener("keydown", e => {
   if(e.key==="Escape"){ if($("#mw").classList.contains("on")) closeModal(); else closeDrawer(); }
   if(e.key==="Enter" && !e.isComposing){
     if(e.target.id==="memIn") addMember();
+    if(e.target.id==="catNew") catAdd();
     if(e.target.id==="cmIn") document.querySelector("[data-cmt]")?.click();
   }
 });
